@@ -4,59 +4,21 @@
 package main
 
 import (
-	"database/sql"
+//	"database/sql"
 	"log"
-
+"server/db"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 	r "server/route"
 	"github.com/labstack/echo/v4/middleware"
 )
-
 func main() {
-	// Database connection string
-	dbConnStr := "user=Nikita password=Backend dbname=golang-database sslmode=disable"
-
-	// Create a database connection
-	db, err := sql.Open("postgres", dbConnStr)
-	if err != nil {
-		log.Fatalf("Failed to open database connection: %v", err)
-	}
-	defer db.Close()
-
-	// Check the connection
-	err = db.Ping()
-	if err != nil {
-		log.Fatalf("Failed to ping database: %v", err)
-	}
-
-	// Create a new table "example_table" with a "test" field
-	_, err = db.Exec(`
-		CREATE TABLE IF NOT EXISTS example_table (
-			id SERIAL PRIMARY KEY,
-			test VARCHAR
-		)
-	`)
-	if err != nil {
-		log.Fatalf("Failed to create table: %v", err)
-	}
-
-	// Insert some data into the "example_table"
-	_, err = db.Exec("INSERT INTO example_table (test) VALUES ($1)", "Hello, World!")
-	if err != nil {
-		log.Fatalf("Failed to insert data into table: %v", err)
-	}
-
-	// Echo instance
 	e := echo.New()
-
-	// Pass the database connection to the route initialization
+	db.Connect()
 	e.Use(middleware.CORS())
 	r.InitRoutes(e)
 
-	// Start server
-	//err = e.Start(":8080")
-	err = e.Start(":5000")
+	err := e.Start(":5000")
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
@@ -80,3 +42,6 @@ func main() {
 //go run server
 //go get github.com/fsnotify/fsnotify
 //go get github.com/lib/pq
+//go get -u github.com/go-pg/migrations/v8
+
+//

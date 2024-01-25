@@ -1,58 +1,105 @@
- 
- package db
+package db
 
 import (
 	"database/sql"
 	"fmt"
+	//	"fmt"
+	//"os"
+	//	"time"
+	"io/ioutil"
 	"os"
-	"time"
+    "path/filepath"
+	"log"
 
 	_ "github.com/lib/pq"
+	"github.com/go-pg/migrations/v8"
 )
 
 var (
 	DB *sql.DB
 )
 
-func GetPostgresConnection() string {
-	fmt.Println(os.Getenv("HOST"))
-	/*host := os.Getenv("HOST")
-	username := os.Getenv("USER")
-	password := os.Getenv("PASSWORD")
-//	dbName := os.Getenv("DB") */
-username:="postgres"
-password:="Belorus2010"
-host:="localhost"
-dbName:="golang-database"
-appName:="golang-database"
-	//appName := os.Getenv("APP_NAME")
-//	port := os.Getenv("PORT")
-port:="8080"
-fmt.Println("DATAAAAAAAAAAAAAAAAA" +host)
-	pqConnection := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable&application_name=%s", username, password, host, port, dbName, appName)
-
-	return pqConnection
-}
-
-
 func Connect() {
-	var err error
-	pqConnection := GetPostgresConnection()
+fmt.Println("DB WORK")
 
-	DB, err = sql.Open("postgres", pqConnection)
+	dbConnStr := "user=Nikita password=Backend dbname=golang-database sslmode=disable"
+	db, err := sql.Open("postgres", dbConnStr)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to open database connection: %v", err)
+	}
+	defer db.Close()
+
+
+	oldVersion, newVersion, err := migrations.Run(db, "up")
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 
-	err = PingDB()
+	fmt.Printf("Migrated from version %d to %d\n", oldVersion, newVersion)
+
+	err = db.Ping()
+	//err = CreateTables()
 	if err != nil {
-		panic(err)
+		log.Fatalf("Failed to ping database: %v", err)
 	}
+	/*_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS example_table (
+			id SERIAL PRIMARY KEY,
+			test VARCHAR
+		)
+	`)
+	if err != nil {
+		log.Fatalf("Failed to create table: %v", err)
+	}
+	_, err = db.Exec("INSERT INTO example_table (test) VALUES ($1)", "Hello, World!")
+	if err != nil {
+		log.Fatalf("Failed to insert data into table: %v", err)
+	}
+*/
+}
+/*
+func CreateTables() error {
+    // Read SQL file content
+    sqlFile, err := ioutil.ReadFile("server/migrations/users_schema")
+    if err != nil {
+        return err
+    }
 
-	DB.SetConnMaxLifetime(time.Duration(10) * time.Second)
-	DB.SetMaxIdleConns(5)
-	DB.SetMaxOpenConns(2)
+    // Execute SQL statements
+    _, err = DB.Exec(string(sqlFile))
+    if err != nil {
+        return err
+    }
 
+    return nil
+} */
+
+
+func CreateTables() error {
+    // Get the current working directory
+    wd, err := os.Getwd()
+    if err != nil {
+        return err
+    }
+
+ 
+   // filePath := filepath.Join(wd, "C:\Users\wotbl\fullstackworklist\server\server\migrations\users_schema.sql")
+	//	"server/migrations/users_schema.sql")
+	filePath := filepath.Join(wd, "/migrations/users_schema.sql")
+    // Read SQL file content C:/Users/wotbl/fullstackworklist/
+    sqlFile, err := ioutil.ReadFile(filePath)
+    if err != nil {
+        return err
+    }
+
+    // Execute SQL statements
+    _, err = DB.Exec(string(sqlFile))
+    if err != nil {
+        return err
+    }
+
+    return nil
 }
 
 func PingDB() error {
