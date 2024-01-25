@@ -80,11 +80,12 @@ import (
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 	r "server/route"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
 	// Database connection string
-	dbConnStr := "user=postgres password=Belorus2010 dbname=golang-database sslmode=disable"
+	dbConnStr := "user=Nikita password=Backend dbname=golang-database sslmode=disable"
 
 	// Create a database connection
 	db, err := sql.Open("postgres", dbConnStr)
@@ -120,11 +121,12 @@ func main() {
 	e := echo.New()
 
 	// Pass the database connection to the route initialization
+	e.Use(middleware.CORS())
 	r.InitRoutes(e)
 
 	// Start server
 	//err = e.Start(":8080")
-	err = e.Start(":8000")
+	err = e.Start(":5000")
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
@@ -135,7 +137,7 @@ func main() {
 
 
 
-
+//Nikita Backend
  
 
 
