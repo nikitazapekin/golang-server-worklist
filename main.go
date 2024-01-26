@@ -4,7 +4,6 @@
 package main
 
 import (
-//	"database/sql"
 	"log"
 "server/db"
 	"github.com/labstack/echo/v4"
