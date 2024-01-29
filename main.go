@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 )
 func main() {
+	//codeEmail := "582455"
 	e := echo.New()
 	db.Connect()
 	e.Use(middleware.CORS())

@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"github.com/labstack/echo/v4"
 	 "server/db"
+
 	 m "server/middleware"
 )
 type RegistrationParams struct {
@@ -14,8 +15,10 @@ type RegistrationParams struct {
 	Telephone string `json:"telephone"`
 	Email     string `json:"email"`
 	Password  string `json:"password"`
+	Code  string `json:"code"`
 }
 func Register(c echo.Context) error {
+	fmt.Println("CODE IN REGISTER"+code)
     fmt.Println("Is working")
     var registrationData RegistrationParams
     err := json.NewDecoder(c.Request().Body).Decode(&registrationData)
@@ -27,12 +30,14 @@ func Register(c echo.Context) error {
 	hashed, hashErr:=m.Encode(registrationData.Password, 180, "key")
 	fmt.Println(hashed)
 	fmt.Println(hashErr)
-	err = db.InsertData(c.Response(), registrationData.Username, registrationData.Password, registrationData.Country, registrationData.City, registrationData.Telephone, registrationData.Email)
+	if(registrationData.Code==code){
+		err = db.InsertData(c.Response(), registrationData.Username, registrationData.Password, registrationData.Country, registrationData.City, registrationData.Telephone, registrationData.Email)
+		return c.JSON(http.StatusOK, map[string]string{"finalRegisterMessage": "correct",})
+	}
     if err != nil {
         fmt.Println("Error at registration:", err)
         return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Registration failed"})
     }
-    return c.JSON(http.StatusOK, map[string]string{"authResponse": "Registration successful",
-})
+	return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Registration failed"})
 }
 

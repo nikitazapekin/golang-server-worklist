@@ -6,5 +6,6 @@ import (
 func SetAuth(e *echo.Echo) {
 	e.POST("/worklist.com/signup", controller.Register)
 	e.POST("/worklist.com/signin", controller.Login)
+	e.POST("/worklist.com/sendCode", controller.SendCodeToEmail)
 }
 

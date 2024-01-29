@@ -33,5 +33,6 @@ require (
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df // indirect
+	gopkg.in/mail.v2 v2.3.1 // indirect
 	mellium.im/sasl v0.3.1 // indirect
 )
