@@ -1,36 +1,3 @@
-/*package controller
-import (
-	"fmt"
-	"net/http"
-	"encoding/json"
-	"github.com/labstack/echo/v4"
-	m "server/db"
-	e "server/middleware"
-)
-type LoginParams struct {
-	Email     string `json:"email"`
-	Password  string `json:"password"`
-}
-func Login(c echo.Context) error {
-	var loginData LoginParams
-    err := json.NewDecoder(c.Request().Body).Decode(&loginData)
-    if err != nil {
-        fmt.Println("Error decoding request body:", err)
-        return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request body"})
-    }
-    fmt.Println("Received login data:", loginData)
-user, userErr:=m.FindUserByEmail(loginData.Email)
-fmt.Println(user)
-if(userErr!=nil){
-	return c.JSON(http.StatusBadRequest, "something went wrong")
-}
-fmt.Println("err")
-jwt, jwtErr:=e.Encode(user.User_id, 180, "key")
-if(jwtErr!=nil) {
-   fmt.Println((jwtErr))
-}
-return c.JSON(http.StatusOK, jwt)
-}  */
 
 
 package controller
@@ -70,7 +37,8 @@ func Login(c echo.Context) error {
 
 	fmt.Println("User found:", user)
 
-	jwt, jwtErr := e.Encode(user.User_id, 180, "key")
+	fmt.Printf("useeeeeeeeeeeerrr_id" +user.User_id)
+	jwt, jwtErr := e.Encode(user.Username, 8180, "key")
 	if jwtErr != nil {
 		fmt.Println(jwtErr)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"Error": "Error generating JWT"})

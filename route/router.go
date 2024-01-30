@@ -8,5 +8,6 @@ func InitRoutes(e *echo.Echo) {
 
 	SetAuth(e)
 	SetBookRoutes(e)
+	SetPersonalInformation(e)
  
 }

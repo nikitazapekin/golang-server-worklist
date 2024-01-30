@@ -127,6 +127,48 @@ func CreateTable() {
         Describtion   string `json:"describtion"`
        User_id               string `json:"user_id"`
     }
+
+
+    func FindUserByUsername(username string) (UserData, error) {
+        fmt.Println("EMAILLLLLLLLLLLLLLLLLL")
+        fmt.Println(username)
+        if DB == nil {
+            return UserData{}, fmt.Errorf("Database connection is not established. Call Connect function first.")
+        }
+    
+        query := "SELECT * FROM user_data WHERE username = $1"
+        row := DB.QueryRow(query, username)
+    
+        var user UserData
+        err := row.Scan(
+            &user.Username,
+            &user.Country,
+            &user.City,
+            &user.Telephone,
+            &user.Email,
+            &user.Password,
+            &user.Role,
+            &user.RegistrationData,
+            &user.Avatar,
+            &user.Document,
+            &user.FavouriteOffers,
+            &user.Experience,
+            &user.Education,
+            &user.LastTimeAtNetwork,
+            &user.Chats,
+            &user.Describtion,
+            &user.User_id,
+        )
+    
+        if err == sql.ErrNoRows {
+            fmt.Println(user)
+            return UserData{}, fmt.Errorf("User not found with email: %s", username)
+        } else if err != nil {
+            return UserData{}, fmt.Errorf("Failed to query user_data: %v", err)
+        }
+    fmt.Println(user)
+        return user, nil
+    }
     func FindUserByEmail(email string) (UserData, error) {
         fmt.Println("EMAILLLLLLLLLLLLLLLLLL")
         fmt.Println(email)
