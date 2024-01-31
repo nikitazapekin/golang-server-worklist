@@ -25,12 +25,10 @@ func generateNumber() string {
 }
 var code string = "ewww"
 func isValidPassword(password string) bool {
-	// Password should be at least 6 characters and contain at least 1 digit
 	return len(password) >= 6 && strings.ContainsAny(password, "0123456789")
 }
 
 func isValidEmail(email string) bool {
-	// Regular expression for simple email validation
 	regex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	return regexp.MustCompile(regex).MatchString(email)
 }
@@ -52,7 +50,6 @@ func SendCodeToEmail(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid password. It should be at least 6 characters and contain at least 1 digit"})
 	}
 	if user, err := m.FindUserByEmail(regData.Email); err == nil {
-		// User already exists, return an error
 		fmt.Println(user)
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "User already registered with this email"})
 	}

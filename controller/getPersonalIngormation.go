@@ -10,7 +10,6 @@ import (
 
 	//m "server/db"
 )
-
  var (
 	DB *sql.DB
 )
@@ -33,47 +32,6 @@ import (
 	Describtion   string `json:"describtion"`
    User_id               string `json:"user_id"`
 }
-/*
-func FindUserByUsername(username string) (UserData, error) {
-	fmt.Println("EMAILLLLLLLLLLLLLLLLLL")
-	fmt.Println(username)
-	if DB == nil {
-		return UserData{}, fmt.Errorf("Database connection is not established. Call Connect function first.")
-	}
-
-	query := "SELECT * FROM user_data WHERE username = $1"
-	row := DB.QueryRow(query, username)
-
-	var user UserData
-	err := row.Scan(
-		&user.Username,
-		&user.Country,
-		&user.City,
-		&user.Telephone,
-		&user.Email,
-		&user.Password,
-		&user.Role,
-		&user.RegistrationData,
-		&user.Avatar,
-		&user.Document,
-		&user.FavouriteOffers,
-		&user.Experience,
-		&user.Education,
-		&user.LastTimeAtNetwork,
-		&user.Chats,
-		&user.Describtion,
-		&user.User_id,
-	)
-
-	if err == sql.ErrNoRows {
-		fmt.Println(user)
-		return UserData{}, fmt.Errorf("User not found with email: %s", username)
-	} else if err != nil {
-		return UserData{}, fmt.Errorf("Failed to query user_data: %v", err)
-	}
-fmt.Println(user)
-	return user, nil
-} */
 func GetPersonalInformation(c echo.Context) error {
 	token := c.QueryParam("token")
 	fmt.Println("Received token:", token)
@@ -92,8 +50,24 @@ user, userErr := m.FindUserByUsername(decodedToken.Username)
 })
 
 	}
+	resObj := map[string]interface{}{
+        "username": user.Username,
+		"country": user.Country, 
+		"city": user.City,
+		"telephone": user.Telephone,
+		"email": user.Email,
+		"RegistrationData": user.RegistrationData,
+		"avatar": user.Avatar,
+		"document": user.Document,
+		"favouriteOffers":  user.FavouriteOffers,
+		"experience": user.Experience,
+		"lastTimeAtNetwork": user.LastTimeAtNetwork,
+		"education": user.Education,
+		"describtion": user.Describtion,
+		 
 
+    }
 	fmt.Println("User found:", user)  
-	return c.JSON(http.StatusOK,user)
+	return c.JSON(http.StatusOK,resObj)
 }
  

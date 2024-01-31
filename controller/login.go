@@ -38,7 +38,7 @@ func Login(c echo.Context) error {
 	fmt.Println("User found:", user)
 
 	fmt.Printf("useeeeeeeeeeeerrr_id" +user.User_id)
-	jwt, jwtErr := e.Encode(user.Username, 8180, "key")
+	jwt, jwtErr := e.Encode(user.Username, 8000180, "key")
 	if jwtErr != nil {
 		fmt.Println(jwtErr)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"Error": "Error generating JWT"})

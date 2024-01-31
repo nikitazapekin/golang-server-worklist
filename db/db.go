@@ -208,3 +208,44 @@ func CreateTable() {
     fmt.Println(user)
         return user, nil
     }
+
+    func UpdateUser(user UserData, currentUserEmail string) error {
+        fmt.Println("User id db")
+        fmt.Println(user)
+        if DB == nil {
+            return fmt.Errorf("Database connection is not established. Call Connect function first.")
+        }
+        //, about='cdwcdcw'
+      /*  query := `
+        UPDATE user_data
+        SET country='gaaaay', city='Min',  telephone='3232', password='Bellll323',
+            education='322323', experience='3232cwdw'
+        WHERE email = 'wotblitz362@mail.ru';
+    ` 
+    _, err := DB.Exec(query) */
+       query := `
+            UPDATE user_data
+            SET country=$2, city=$3, telephone=$4, password=$5,
+                education=$6, describtion=$7, experience=$8
+            WHERE email = $1
+        ` 
+        _, err := DB.Exec(query,
+            currentUserEmail,
+          //  user.Email, 
+        //  "wotblitz362@mail.ru",
+            user.Country, user.City, user.Telephone, user.Password,
+            user.Education, user.Describtion, user.Experience,
+           
+        ) 
+    
+        if err != nil {
+         //   fmt.Errorf("Failed to update user_data: %v", err)
+           // return err
+           return fmt.Errorf("Failed to update user_data: %v", err)
+
+          //  return fmt.Errorf("Failed to update user_data: %v", err)
+        }
+    
+        fmt.Println("User updated successfully.")
+        return nil
+    }
