@@ -75,7 +75,9 @@ func main() {
 } 
  */
 
-/* РАБОТАААААААААААААААААААААААААААААААААААААААЕТ
+ /*
+
+// РАБОТАААААААААААААААААААААААААААААААААААААААЕТ
  package main
 
 import (
@@ -135,10 +137,7 @@ func saveFile(src io.Reader, filename string) error {
 
 import (
 	"fmt"
-	"net/http"
-	"io"
-	"os"
-	"path/filepath"
+	
 
 
 
@@ -146,57 +145,20 @@ import (
 "server/db"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
-//	r "server/route"
+	r "server/route"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func uploadHandler(res http.ResponseWriter, req *http.Request) {
-	if req.Method == "POST" {
-		src, hdr, err := req.FormFile("my-file")
-		if err != nil {
-			http.Error(res, err.Error(), 500)
-			return
-		}
-		defer src.Close()
-
-		err = saveFile(src, hdr.Filename)
-		if err != nil {
-			http.Error(res, err.Error(), 500)
-			return
-		}
-
-		fmt.Fprintf(res, "File %s uploaded successfully!", hdr.Filename)
-		return
-	}
-}
-
-func saveFile(src io.Reader, filename string) error {
-	dst, err := os.Create(filepath.Join("static", filename))
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
-
-	_, err = io.Copy(dst, src)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
 
 func main() {
 	fmt.Println("STATIC DIR:", "static")
-	mux := http.NewServeMux()
 	e := echo.New()
 	db.Connect()
 	e.Use(middleware.CORS())
-	//r.InitRoutes(e)
+	r.InitRoutes(e)
 	err := e.Start(":5000")
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
-	mux.HandleFunc("/", uploadHandler)
-	http.ListenAndServe(":5000", mux)
 }
  
