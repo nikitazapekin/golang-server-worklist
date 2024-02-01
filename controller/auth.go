@@ -30,7 +30,16 @@ func Register(c echo.Context) error {
 	hashed, hashErr:=m.Encode(registrationData.Password, 180, "key")
 	fmt.Println(hashed)
 	fmt.Println(hashErr)
+	fmt.Println("CODEEEEEEEEEEEEEEEEEEEEEE"+registrationData.Code)
 	if(registrationData.Code==code){
+		fmt.Println("Reg paramssssssssssssssssssssssssssssssss")
+		fmt.Println(registrationData.Username)
+		fmt.Println(registrationData.City)
+		fmt.Println(registrationData.Country)
+		fmt.Println(registrationData.Password)
+		fmt.Println(registrationData.Username)
+		fmt.Println(registrationData.Telephone)
+		fmt.Println(registrationData.Email)
 		err = db.InsertData(c.Response(), registrationData.Username, registrationData.Password, registrationData.Country, registrationData.City, registrationData.Telephone, registrationData.Email)
 		return c.JSON(http.StatusOK, map[string]string{"finalRegisterMessage": "correct",})
 	}

@@ -40,24 +40,19 @@ isCorrectInputData:=true;
 	currentUserEmail :=""
 	if !isValidEmail(editDataParams.Email) {
 		isCorrectInputData=false;
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid email address"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"errorMessage": "Invalid email address"})
 	}
 	if !isValidPassword(editDataParams.Password) {
 		isCorrectInputData=false;
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid password. It should be at least 6 characters and contain at least 1 digit"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"errorMessage": "Invalid password. It should be at least 6 characters and contain at least 1 digit"})
 	}
 	if user, err := m.FindUserByUsername(decodedToken.Username); err == nil {
 		fmt.Println(user)
 		currentUserEmail=user.Email
-		
-if(user.Email==editDataParams.Email){
-	isCorrectInputData=false;
-	return c.JSON(http.StatusBadRequest, map[string]string{"error": "Please type another email adress"})
-}
 userr, errr := m.FindUserByEmail(editDataParams.Email);
-if(userr.Email!= "") {
+if(userr.Email!= "" && userr.Email!=currentUserEmail) {
 	isCorrectInputData=false;
-	return c.JSON(http.StatusBadRequest, map[string]string{"error": "User already registered with this email"}) 
+	return c.JSON(http.StatusBadRequest, map[string]string{"errorMessage": "User already registered with this email"}) 
 }
 fmt.Println(userr, errr)
 }
@@ -74,11 +69,14 @@ if(isCorrectInputData){
 	user.City   =editDataParams.City
 	user.Document  =editDataParams.Document
 //	 m.UpdateUser(user)
+fmt.Println("TEL BEFORE EDIT" +user.Telephone)
+fmt.Println("Education before edit" +user.Education)
+fmt.Println("Describtion vefore" +user.Describtion)
 errr := m.UpdateUser(user, currentUserEmail)
 fmt.Println("ERROR ", errr)
 	fmt.Println("Everything is clear")
 	fmt.Println(user)
 	return c.JSON(http.StatusOK,  user,)
 }
-return c.JSON(http.StatusBadRequest, map[string]string{"error": "something went wrong"})
+return c.JSON(http.StatusBadRequest, map[string]string{"errorMessage": "something went wrong"})
 }

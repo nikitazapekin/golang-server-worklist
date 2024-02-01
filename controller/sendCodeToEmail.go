@@ -5,7 +5,7 @@ import (
 	"strings"
 	"regexp"
 	"math/rand"
-	gomail "gopkg.in/gomail.v2"
+	//gomail "gopkg.in/gomail.v2"
 	"net/http"
 	"encoding/json"
 	"github.com/labstack/echo/v4"
@@ -53,7 +53,7 @@ func SendCodeToEmail(c echo.Context) error {
 		fmt.Println(user)
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "User already registered with this email"})
 	}
-	key := "xsmtpsib-e6ed306964a46e88f2c96db9d3d09bb4406a08f87ba9066c2ec61665dd206d6d-IO3F9rwdmjSgARp1"
+	/*key := "xsmtpsib-e6ed306964a46e88f2c96db9d3d09bb4406a08f87ba9066c2ec61665dd206d6d-IO3F9rwdmjSgARp1"
 	from := "testemailforprojects341@gmail.com"
 	host := "smtp-relay.brevo.com"
 	port := 587
@@ -66,11 +66,11 @@ func SendCodeToEmail(c echo.Context) error {
 	n := gomail.NewDialer(host, port, from, key)
 	if err := n.DialAndSend(msg); err != nil {
 
-		//return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to send email"})
-	}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to send email"})
+	} */
 	code=generateNumber()
-	fmt.Println("Code "+code)
-	return c.JSON(http.StatusOK, "Please type code that was sended on "+ regData.Email)
+	
+	return c.JSON(http.StatusOK, "Please type code that was sended on "+ regData.Email +": "+code)
 }
 
 

@@ -52,7 +52,7 @@ func CreateTable() {
 		role VARCHAR(255),
 		registration_data VARCHAR(255),
 		avatar VARCHAR(255),
-		document BYTEA,
+		document VARCHAR(255),
 		favourite_offers JSONB,
 		experience VARCHAR(255),
 		education VARCHAR(255),
@@ -106,8 +106,6 @@ func CreateTable() {
         randomNumber := rand.Intn(100000000) 
         return fmt.Sprintf("%d%d", timestamp, randomNumber)
     }
-
-
     type UserData struct {
         Username             string `json:"username"`
         Country              string `json:"country"`
@@ -127,15 +125,13 @@ func CreateTable() {
         Describtion   string `json:"describtion"`
        User_id               string `json:"user_id"`
     }
-
-
     func FindUserByUsername(username string) (UserData, error) {
         fmt.Println("EMAILLLLLLLLLLLLLLLLLL")
         fmt.Println(username)
         if DB == nil {
             return UserData{}, fmt.Errorf("Database connection is not established. Call Connect function first.")
         }
-    
+
         query := "SELECT * FROM user_data WHERE username = $1"
         row := DB.QueryRow(query, username)
     
@@ -159,7 +155,6 @@ func CreateTable() {
             &user.Describtion,
             &user.User_id,
         )
-    
         if err == sql.ErrNoRows {
             fmt.Println(user)
             return UserData{}, fmt.Errorf("User not found with email: %s", username)
@@ -211,41 +206,91 @@ func CreateTable() {
 
     func UpdateUser(user UserData, currentUserEmail string) error {
         fmt.Println("User id db")
-        fmt.Println(user)
+        fmt.Println("current email" +currentUserEmail)
+        fmt.Println("Tel " +user.Telephone)
+        fmt.Println("doc" +user.Document)
         if DB == nil {
             return fmt.Errorf("Database connection is not established. Call Connect function first.")
         }
-        //, about='cdwcdcw'
-      /*  query := `
-        UPDATE user_data
-        SET country='gaaaay', city='Min',  telephone='3232', password='Bellll323',
-            education='322323', experience='3232cwdw'
-        WHERE email = 'wotblitz362@mail.ru';
-    ` 
-    _, err := DB.Exec(query) */
        query := `
             UPDATE user_data
             SET country=$2, city=$3, telephone=$4, password=$5,
-                education=$6, describtion=$7, experience=$8
+                education=$6, describtion=$7, experience=$8,  document=$9, email=$10
             WHERE email = $1
         ` 
         _, err := DB.Exec(query,
             currentUserEmail,
-          //  user.Email, 
-        //  "wotblitz362@mail.ru",
             user.Country, user.City, user.Telephone, user.Password,
-            user.Education, user.Describtion, user.Experience,
+            user.Education, user.Describtion, user.Experience, user.Document, user.Email,
            
         ) 
     
         if err != nil {
-         //   fmt.Errorf("Failed to update user_data: %v", err)
-           // return err
            return fmt.Errorf("Failed to update user_data: %v", err)
-
-          //  return fmt.Errorf("Failed to update user_data: %v", err)
         }
     
         fmt.Println("User updated successfully.")
         return nil
     }
+/*
+    func AddLogo(logoURL, userEmail string) error {
+        if DB == nil {
+            return fmt.Errorf("Database connection is not established. Call Connect function first.")
+        }
+    
+        query := `
+            UPDATE user_data
+            SET logos = array_append(logos, $2)
+            WHERE email = $1
+        `
+    
+        _, err := DB.Exec(query, userEmail, logoURL)
+        if err != nil {
+            return fmt.Errorf("Failed to update logos field: %v", err)
+        }
+    
+        fmt.Println("Logo URL added successfully.")
+        return nil
+    } */
+
+
+    const createTableQuery = `
+CREATE TABLE IF NOT EXISTS user_logos (
+    id SERIAL PRIMARY KEY,
+    user_email VARCHAR(255),
+    logo_url VARCHAR(255)
+);
+`
+
+func initDatabase() error {
+    // Your existing database initialization code
+
+    // Create the user_logos table
+    _, err := DB.Exec(createTableQuery)
+    if err != nil {
+        return fmt.Errorf("Failed to create user_logos table: %v", err)
+    }
+
+    return nil
+}
+
+func AddLogo(logoURL, userEmail string) error {
+    initDatabase()
+    fmt.Println("INIT")
+    if DB == nil {
+        return fmt.Errorf("Database connection is not established. Call Connect function first.")
+    }
+
+    query := `
+        INSERT INTO user_logos (user_email, logo_url)
+        VALUES ($1, $2)
+    `
+
+    _, err := DB.Exec(query, userEmail, logoURL)
+    if err != nil {
+        return fmt.Errorf("Failed to insert logo record: %v", err)
+    }
+
+    fmt.Println("Logo URL added successfully.")
+    return nil
+}
