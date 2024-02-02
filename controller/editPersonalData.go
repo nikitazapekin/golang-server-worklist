@@ -27,27 +27,19 @@ func EditPersonalInformation(c echo.Context) error {
 	var editDataParams EditDataParams
 	err := json.NewDecoder(c.Request().Body).Decode(&editDataParams)
 	fmt.Println(err)
-	fmt.Println(editDataParams)
-	fmt.Println((editDataParams.Country))
 isCorrectInputData:=true;
 	decodedToken, errToken := e.Decode(editDataParams.Token,  "key")
-	fmt.Println("Decoded")
-	fmt.Println(decodedToken)
-	fmt.Println("USERNAME"+decodedToken.Username)
 	fmt.Println(errToken)
-	fmt.Println(isCorrectInputData)
-	fmt.Println("USER"+decodedToken.Username)
 	currentUserEmail :=""
 	if !isValidEmail(editDataParams.Email) {
 		isCorrectInputData=false;
 		return c.JSON(http.StatusBadRequest, map[string]string{"errorMessage": "Invalid email address"})
 	}
-	if !isValidPassword(editDataParams.Password) {
+	if !isValidPassword(editDataParams.Password) && len(editDataParams.Password)!=0 {
 		isCorrectInputData=false;
 		return c.JSON(http.StatusBadRequest, map[string]string{"errorMessage": "Invalid password. It should be at least 6 characters and contain at least 1 digit"})
 	}
 	if user, err := m.FindUserByUsername(decodedToken.Username); err == nil {
-		fmt.Println(user)
 		currentUserEmail=user.Email
 userr, errr := m.FindUserByEmail(editDataParams.Email);
 if(userr.Email!= "" && userr.Email!=currentUserEmail) {
@@ -63,7 +55,10 @@ if(isCorrectInputData){
 	user.Describtion =editDataParams.About  
 	user.Experience  =editDataParams.Experience  
 	user.Email  =editDataParams.Email  
-	user.Password =editDataParams.Password  
+	fmt.Println("NEWWWW PASSWORDDDDDDDDDDDD"+editDataParams.Password)
+	if(len(editDataParams.Password  )!=0) {
+		user.Password =editDataParams.Password  
+	} 
 	user.Telephone =editDataParams.Tepephone 
 	user.Country =editDataParams.Country   
 	user.City   =editDataParams.City

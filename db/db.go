@@ -1,4 +1,3 @@
-
 package db
 
 import (
@@ -6,8 +5,10 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
-	"time"
 	"net/http"
+	"time"
+
+//	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
@@ -115,7 +116,8 @@ func CreateTable() {
         Password             string `json:"password"`
         Role                 string `json:"role"`
         RegistrationData     string `json:"registration_data"`
-        Avatar               string `json:"avatar"`
+        Avatar []byte `json:"avatar"`
+     //   Avatar              string `json:"avatar"`
         Document             string `json:"document"`
         FavouriteOffers      string `json:"favourite_offers"`
         Experience           string `json:"experience"`

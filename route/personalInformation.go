@@ -70,33 +70,59 @@ import (
 	"github.com/labstack/echo/v4"
 	"fmt"
 	"io"
+	m "server/db"
+	e "server/middleware"
+//	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 )
-
-func uploadHandler(c echo.Context) error {
+ func uploadHandler(c echo.Context) error {
+	token := c.QueryParam("token")
+	 
+	decodedToken, _ := e.Decode(token,  "key")
+	fmt.Println(decodedToken)
 	src, err := c.FormFile("my-file")
+	fmt.Println("SRCCCCCCCCC"+src.Filename)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-
 	file, err := src.Open()
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	defer file.Close()
-
+	fmt.Println("FILE")
+fmt.Println(file)
 	err = saveFile(file, src.Filename)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
+	if user, err := m.FindUserByUsername(decodedToken.Username); err == nil {
 
+		fmt.Println("USER AVATAR")
+		fmt.Println(user)
+
+	}
 	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully!", src.Filename))
 }
+func serveFile(w http.ResponseWriter, r *http.Request) {
+	filename := r.URL.Path[len("/static/"):]
+	filePath := filepath.Join("static", filename)
 
+	fmt.Println("FILRPATHHHHHHHHHH" +filePath)
+	http.ServeFile(w, r, filePath)
+}
 func saveFile(src io.Reader, filename string) error {
 	dst, err := os.Create(filepath.Join("static", filename))
+	fmt.Println("SAVE FILE" )
+	fmt.Println(src) 
+	fmt.Println(filename)
+	http.HandleFunc("/static/", serveFile)
+	fileURL := fmt.Sprintf("http://localhost:5000/static/%s", filename)
+fmt.Println("URLLLLLLLLLLLLLLLLLL"+fileURL)
+ 
+
 	if err != nil {
 		return err
 	}
