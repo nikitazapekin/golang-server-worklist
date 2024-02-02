@@ -31,6 +31,8 @@ func Register(c echo.Context) error {
 	fmt.Println(hashed)
 	fmt.Println(hashErr)
 	fmt.Println("CODEEEEEEEEEEEEEEEEEEEEEE"+registrationData.Code)
+	fmt.Println("CODE "+code)
+	fmt.Println("Reg CODE "+registrationData.Code)
 	if(registrationData.Code==code){
 		fmt.Println("Reg paramssssssssssssssssssssssssssssssss")
 		fmt.Println(registrationData.Username)

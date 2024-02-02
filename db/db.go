@@ -116,8 +116,8 @@ func CreateTable() {
         Password             string `json:"password"`
         Role                 string `json:"role"`
         RegistrationData     string `json:"registration_data"`
-        Avatar []byte `json:"avatar"`
-     //   Avatar              string `json:"avatar"`
+       // Avatar []byte `json:"avatar"`
+       Avatar              string `json:"avatar"`
         Document             string `json:"document"`
         FavouriteOffers      string `json:"favourite_offers"`
         Experience           string `json:"experience"`
@@ -234,28 +234,31 @@ func CreateTable() {
         fmt.Println("User updated successfully.")
         return nil
     }
-/*
-    func AddLogo(logoURL, userEmail string) error {
+    func UpdateUserAvatar(user UserData, newAvatar string) error {
+        fmt.Println("User id db")
+    //    fmt.Println("current email" +currentUserEmail)
+        fmt.Println("Tel " +user.Telephone)
+        fmt.Println("doc" +user.Document)
         if DB == nil {
             return fmt.Errorf("Database connection is not established. Call Connect function first.")
         }
-    
-        query := `
+       query := `
             UPDATE user_data
-            SET logos = array_append(logos, $2)
+            SET avatar=$2
             WHERE email = $1
-        `
+        ` 
+        _, err := DB.Exec(query,
+          user.Email,
+          newAvatar,
+        ) 
     
-        _, err := DB.Exec(query, userEmail, logoURL)
         if err != nil {
-            return fmt.Errorf("Failed to update logos field: %v", err)
+           return fmt.Errorf("Failed to update user_data: %v", err)
         }
     
-        fmt.Println("Logo URL added successfully.")
+        fmt.Println("User updated successfully.")
         return nil
-    } */
-
-
+    }
     const createTableQuery = `
 CREATE TABLE IF NOT EXISTS user_logos (
     id SERIAL PRIMARY KEY,
@@ -265,9 +268,6 @@ CREATE TABLE IF NOT EXISTS user_logos (
 `
 
 func initDatabase() error {
-    // Your existing database initialization code
-
-    // Create the user_logos table
     _, err := DB.Exec(createTableQuery)
     if err != nil {
         return fmt.Errorf("Failed to create user_logos table: %v", err)

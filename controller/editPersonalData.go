@@ -64,9 +64,6 @@ if(isCorrectInputData){
 	user.City   =editDataParams.City
 	user.Document  =editDataParams.Document
 //	 m.UpdateUser(user)
-fmt.Println("TEL BEFORE EDIT" +user.Telephone)
-fmt.Println("Education before edit" +user.Education)
-fmt.Println("Describtion vefore" +user.Describtion)
 errr := m.UpdateUser(user, currentUserEmail)
 fmt.Println("ERROR ", errr)
 	fmt.Println("Everything is clear")

@@ -77,18 +77,28 @@ import (
 	"os"
 	"path/filepath"
 )
-/*
-func  img(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, ".templates/heart.jpg")
-} */
+
 
 
 func img(c echo.Context) error {
-    filePath := "static/heart.png"
-	fmt.Println("FILEEEPATH "+filePath)
-//	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully!", "cw"))
-//	return "hello"
-    return c.File(filePath)
+	token := c.QueryParam("token")
+	decodedToken, _ := e.Decode(token,  "key")
+	if user, err := m.FindUserByUsername(decodedToken.Username); err == nil {
+		filePath := "static/"+user.Avatar
+	//	filePath := "static/heart.png"
+		fmt.Println("USER AVATAR")
+		fmt.Println(decodedToken)
+		fmt.Println(user)
+		fmt.Println("FILEEEPATH "+filePath)
+		fmt.Println( c.File(filePath))
+		response := map[string]string{
+            "avatar": filePath,
+        }
+
+		return c.JSON(http.StatusOK, response)
+	//	return c.File(filePath)
+	} 
+	return c.JSON(http.StatusBadRequest, "{message: error}")
 }
 
  func uploadHandler(c echo.Context) error {
@@ -97,7 +107,7 @@ func img(c echo.Context) error {
 	decodedToken, _ := e.Decode(token,  "key")
 	fmt.Println(decodedToken)
 	src, err := c.FormFile("my-file")
-	fmt.Println("SRCCCCCCCCC"+src.Filename)
+	fmt.Println("SRCCCCCCCCC"+src.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -116,18 +126,21 @@ fmt.Println(file)
 
 		fmt.Println("USER AVATAR")
 		fmt.Println(user)
+//user.Avatar=string(src.Filename)
+fmt.Println("New avaaaaaaaaaaaaaaaaaaaa")
+fmt.Println(user.Avatar)
+newAvatar :=string(src.Filename)
 
+errr := m.UpdateUserAvatar(user, newAvatar)
+fmt.Println("ERROR ", errr)
+	fmt.Println("Everything is clear")
+	fmt.Println(user)
 	}
 	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully!", src.Filename))
 }
 
 func saveFile(src io.Reader, filename string) error {
 	dst, err := os.Create(filepath.Join("static", filename))
-
-	 
-	fileURL := fmt.Sprintf("http://localhost:5000/static/%s", filename)
-fmt.Println("URLLLLLLLLLLLLLLLLLL"+fileURL)
- 
 
 	if err != nil {
 		return err
