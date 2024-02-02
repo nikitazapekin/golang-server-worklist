@@ -77,6 +77,20 @@ import (
 	"os"
 	"path/filepath"
 )
+/*
+func  img(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, ".templates/heart.jpg")
+} */
+
+
+func img(c echo.Context) error {
+    filePath := "static/heart.png"
+	fmt.Println("FILEEEPATH "+filePath)
+//	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully!", "cw"))
+//	return "hello"
+    return c.File(filePath)
+}
+
  func uploadHandler(c echo.Context) error {
 	token := c.QueryParam("token")
 	 
@@ -106,19 +120,11 @@ fmt.Println(file)
 	}
 	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully!", src.Filename))
 }
-func serveFile(w http.ResponseWriter, r *http.Request) {
-	filename := r.URL.Path[len("/static/"):]
-	filePath := filepath.Join("static", filename)
 
-	fmt.Println("FILRPATHHHHHHHHHH" +filePath)
-	http.ServeFile(w, r, filePath)
-}
 func saveFile(src io.Reader, filename string) error {
 	dst, err := os.Create(filepath.Join("static", filename))
-	fmt.Println("SAVE FILE" )
-	fmt.Println(src) 
-	fmt.Println(filename)
-	http.HandleFunc("/static/", serveFile)
+
+	 
 	fileURL := fmt.Sprintf("http://localhost:5000/static/%s", filename)
 fmt.Println("URLLLLLLLLLLLLLLLLLL"+fileURL)
  
@@ -141,4 +147,6 @@ func SetPersonalInformation(e *echo.Echo) {
 	e.GET("/worklist.com/getPersonalInformation", controller.GetPersonalInformation)
 	e.POST("/worklist.com/getPersonalInformation/setAvatar", controller.SetAvatar)
 	e.POST("/test", uploadHandler)
+	e.GET("/worklist.com/getPersonalInformation/getAvatar", img)
 }
+//http://localhost:5000/worklist.com/getPersonalInformation/getAvatar
