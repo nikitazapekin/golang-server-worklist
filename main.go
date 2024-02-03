@@ -106,6 +106,15 @@ func main() {
 
 
 
+
+
+
+
+
+
+
+
+ 
  package main
 
 import (
@@ -119,7 +128,9 @@ import (
 	"github.com/gorilla/websocket"
 	r "server/route"
 )
-
+var numberOfOnlineUsers = 0 
+var clients = make(map[*websocket.Conn]bool)
+var onlineUsersMessage = "%d"
 var (
 	upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -130,12 +141,21 @@ var (
 	}
 )
 
-func handleWebSocket(c echo.Context) error {
+ func handleWebSocket(c echo.Context) error {
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	clients[conn] = true
+	numberOfOnlineUsers++
+	broadcastOnlineUsersMessage()
+
+	defer func() {
+		numberOfOnlineUsers--
+		delete(clients, conn)
+		broadcastOnlineUsersMessage()
+		conn.Close()
+	}()
 
 	for {
 		messageType, p, err := conn.ReadMessage()
@@ -143,10 +163,26 @@ func handleWebSocket(c echo.Context) error {
 			return err
 		}
 		fmt.Printf("Received message: %s\n", p)
-
+		fmt.Println("CONNNN")
+		fmt.Println(conn)
+		fmt.Println(messageType)
+		fmt.Println(p)
 		err = conn.WriteMessage(messageType, []byte("Hello, client!"))
 		if err != nil {
 			return err
+		}
+	}
+}
+ 
+func broadcastOnlineUsersMessage() {
+	message := fmt.Sprintf(onlineUsersMessage, numberOfOnlineUsers)
+	fmt.Println("MESSSSSSSSSAAAGE")
+	fmt.Println(message)
+	fmt.Println(clients)
+	for client := range clients {
+		err := client.WriteMessage(websocket.TextMessage, []byte(message))
+		if err != nil {
+			log.Printf("Error sending message to client: %v", err)
 		}
 	}
 }
@@ -157,8 +193,7 @@ func main() {
 	db.Connect()
 	e.Use(middleware.CORS())
 	r.InitRoutes(e)
-
-	// Route for WebSocket
+ 
 	e.GET("/ws", handleWebSocket)
 
 	err := e.Start(":5000")
@@ -166,3 +201,8 @@ func main() {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 }
+ 
+
+
+
+

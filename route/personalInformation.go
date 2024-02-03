@@ -126,7 +126,6 @@ fmt.Println(file)
 
 		fmt.Println("USER AVATAR")
 		fmt.Println(user)
-//user.Avatar=string(src.Filename)
 fmt.Println("New avaaaaaaaaaaaaaaaaaaaa")
 fmt.Println(user.Avatar)
 newAvatar :=string(src.Filename)
