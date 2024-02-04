@@ -85,7 +85,6 @@ func img(c echo.Context) error {
 	decodedToken, _ := e.Decode(token,  "key")
 	if user, err := m.FindUserByUsername(decodedToken.Username); err == nil {
 		filePath := "static/"+user.Avatar
-	//	filePath := "static/heart.png"
 		fmt.Println("USER AVATAR")
 		fmt.Println(decodedToken)
 		fmt.Println(user)
@@ -96,7 +95,6 @@ func img(c echo.Context) error {
         }
 
 		return c.JSON(http.StatusOK, response)
-	//	return c.File(filePath)
 	} 
 	return c.JSON(http.StatusBadRequest, "{message: error}")
 }
@@ -123,8 +121,6 @@ fmt.Println(file)
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	if user, err := m.FindUserByUsername(decodedToken.Username); err == nil {
-
-		fmt.Println("USER AVATAR")
 		fmt.Println(user)
 fmt.Println("New avaaaaaaaaaaaaaaaaaaaa")
 fmt.Println(user.Avatar)
@@ -154,11 +150,71 @@ func saveFile(src io.Reader, filename string) error {
 	return nil
 }
 
+
+
+
+
+
+
+
+
+
+func uploadHandlerMultiple(c echo.Context) error {
+	token := c.QueryParam("token")
+
+	decodedToken, _ := e.Decode(token, "key")
+	fmt.Println(decodedToken)
+
+	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB limit
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	form := c.Request().MultipartForm
+	files := form.File["my-files"] 
+
+	fmt.Println("FILEEEEEEEEEEEEEEEESSSS")
+	fmt.Println(files)
+
+	for _, file := range files {
+		fmt.Println("SRCCCCCCCCC" + file.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
+
+		src, err := file.Open()
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		defer src.Close()
+
+		err = saveFile(src, file.Filename)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+
+	/*	if user, err := m.FindUserByUsername(decodedToken.Username); err == nil {
+			fmt.Println(user)
+			fmt.Println("New avaaaaaaaaaaaaaaaaaaaa")
+			fmt.Println(user.Avatar)
+			newAvatar := string(file.Filename)
+
+			errr := m.UpdateUserAvatar(user, newAvatar)
+			fmt.Println("ERROR ", errr)
+			fmt.Println("Everything is clear")
+			fmt.Println(user)
+		} */
+	}
+
+	return c.String(http.StatusOK, "Files uploaded successfully!")
+}
+
+
+
+
 func SetPersonalInformation(e *echo.Echo) {
 	e.POST("/worklist.com/getPersonalInformation/editPersonalData", controller.EditPersonalInformation)
 	e.GET("/worklist.com/getPersonalInformation", controller.GetPersonalInformation)
 	e.POST("/worklist.com/getPersonalInformation/setAvatar", controller.SetAvatar)
 	e.POST("/test", uploadHandler)
+	e.POST("/testMultiple", uploadHandlerMultiple)
 	e.GET("/worklist.com/getPersonalInformation/getAvatar", img)
 }
 //http://localhost:5000/worklist.com/getPersonalInformation/getAvatar

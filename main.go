@@ -136,7 +136,7 @@ var (
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
-			return true // Allow any origin
+			return true 
 		},
 	}
 )
@@ -149,7 +149,6 @@ var (
 	clients[conn] = true
 	numberOfOnlineUsers++
 	broadcastOnlineUsersMessage()
-
 	defer func() {
 		numberOfOnlineUsers--
 		delete(clients, conn)
