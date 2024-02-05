@@ -21,7 +21,6 @@ type EditDataParams struct {
 	Document   string `json:"document"`
 	Token      string `json:"token"`
 }
-
 func EditPersonalInformation(c echo.Context) error {
 	var editDataParams EditDataParams
 	err := json.NewDecoder(c.Request().Body).Decode(&editDataParams)

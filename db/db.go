@@ -6,6 +6,8 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+    "github.com/lib/pq"
+	_ "github.com/lib/pq"
 	"time"
 
 //	"github.com/google/uuid"
@@ -24,6 +26,7 @@ func Connect() {
 	}
 	DB = db
 	CreateTable()
+    CreateTableOfOffers()
 	err = db.Ping()
 	if err != nil {
 		log.Fatalf("Failed to ping database: %v", err)
@@ -69,6 +72,59 @@ func CreateTable() {
 	}
 	fmt.Println("Table user_data created successfully.")
 }
+
+func CreateTableOfOffers() {
+	if DB == nil {
+		log.Fatal("Database connection is not established. Call Connect function first.")
+	}
+	query := `
+	CREATE TABLE IF NOT EXISTS vacancy_data (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255),
+        describtion VARCHAR(255),
+        skills VARCHAR(255)[] ,
+        workingPerDay VARCHAR(255),
+        location VARCHAR(255),
+           salary VARCHAR(255)
+	);
+	`
+	_, err := DB.Exec(query)
+	if err != nil {
+		log.Fatalf("Failed to create table: %v", err)
+	}
+	fmt.Println("Table user_data created successfully.")
+}
+
+//c.Response(), createVacancyParams.Title, createVacancyParams.Describtion, createVacancyParams.Skills[], createVacancyParams.WorkingPerDay, createVacancyParams.Location, createVacancyParams.Salary
+//func InsertDataIntoOffers(w http.ResponseWriter, title string, describtion string, skills  String[], workingPerDay string, location string, salary string) error {
+    func InsertDataIntoOffers(w http.ResponseWriter, title string, describtion string, skills []string, workingPerDay string, location string, salary string) error {
+        fmt.Println("SKIIIIIIIIIIIIIIIIIIIIIILS")
+        fmt.Println(skills)
+    if DB == nil {
+        http.Error(w, "Database connection is not established. Call Connect function first.", http.StatusInternalServerError)
+        return fmt.Errorf("Database connection is not established. Call Connect function first.")
+    }
+    query := "INSERT INTO vacancy_data   (title, describtion, skills,  workingPerDay, location, salary) VALUES ($1, $2, $3, $4, $5, $6);" //$16
+   
+   
+    _, err := DB.Exec(query,
+title, describtion,// skills,
+pq.Array(skills),
+ workingPerDay, location, salary,
+)
+if err != nil {
+    fmt.Println("Error at auth")
+    http.Error(w, fmt.Sprintf("Failed to insert data into user_data: %v", err), http.StatusInternalServerError)
+    return fmt.Errorf("Failed to insert data into user_data: %v", err)
+}
+
+fmt.Println("Data inserted into user_data successfully.") 
+return nil
+  
+}
+
+
+
  func InsertData(w http.ResponseWriter, username string, password string, country, city string, telephone string, email string) error {
     if DB == nil {
         http.Error(w, "Database connection is not established. Call Connect function first.", http.StatusInternalServerError)

@@ -4,7 +4,7 @@ import (
 	"server/controller"
 	"github.com/labstack/echo/v4"
 
-	
+
 
 
 	"fmt"
@@ -62,51 +62,48 @@ func SetPersonalInformation(e *echo.Echo) {
 
 */
 
-
 package router
 
 import (
-	"server/controller"
-	"github.com/labstack/echo/v4"
 	"fmt"
+	"github.com/labstack/echo/v4"
 	"io"
+	"server/controller"
 	//"encoding/json"
 	m "server/db"
 	e "server/middleware"
-//	"io/ioutil"
+	//	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
 )
 
-
-
 func img(c echo.Context) error {
 	token := c.QueryParam("token")
-	decodedToken, _ := e.Decode(token,  "key")
+	decodedToken, _ := e.Decode(token, "key")
 	if user, err := m.FindUserByUsername(decodedToken.Username); err == nil {
-		filePath := "static/"+user.Avatar
+		filePath := "static/" + user.Avatar
 		fmt.Println("USER AVATAR")
 		fmt.Println(decodedToken)
 		fmt.Println(user)
-		fmt.Println("FILEEEPATH "+filePath)
-		fmt.Println( c.File(filePath))
+		fmt.Println("FILEEEPATH " + filePath)
+		fmt.Println(c.File(filePath))
 		response := map[string]string{
-            "avatar": filePath,
-        }
+			"avatar": filePath,
+		}
 
 		return c.JSON(http.StatusOK, response)
-	} 
+	}
 	return c.JSON(http.StatusBadRequest, "{message: error}")
 }
 
- func uploadHandler(c echo.Context) error {
+func uploadHandler(c echo.Context) error {
 	token := c.QueryParam("token")
-	 
-	decodedToken, _ := e.Decode(token,  "key")
+
+	decodedToken, _ := e.Decode(token, "key")
 	fmt.Println(decodedToken)
 	src, err := c.FormFile("my-file")
-	fmt.Println("SRCCCCCCCCC"+src.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
+	fmt.Println("SRCCCCCCCCC" + src.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -116,21 +113,21 @@ func img(c echo.Context) error {
 	}
 	defer file.Close()
 	fmt.Println("FILE")
-fmt.Println(file)
+	fmt.Println(file)
 	err = saveFile(file, src.Filename)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
 	if user, err := m.FindUserByUsername(decodedToken.Username); err == nil {
 		fmt.Println(user)
-fmt.Println("New avaaaaaaaaaaaaaaaaaaaa")
-fmt.Println(user.Avatar)
-newAvatar :=string(src.Filename)
+		fmt.Println("New avaaaaaaaaaaaaaaaaaaaa")
+		fmt.Println(user.Avatar)
+		newAvatar := string(src.Filename)
 
-errr := m.UpdateUserAvatar(user, newAvatar)
-fmt.Println("ERROR ", errr)
-	fmt.Println("Everything is clear")
-	fmt.Println(user)
+		errr := m.UpdateUserAvatar(user, newAvatar)
+		fmt.Println("ERROR ", errr)
+		fmt.Println("Everything is clear")
+		fmt.Println(user)
 	}
 	return c.String(http.StatusOK, fmt.Sprintf("File %s uploaded successfully!", src.Filename))
 }
@@ -150,25 +147,28 @@ func saveFile(src io.Reader, filename string) error {
 
 	return nil
 }
+func getAbsoluteURL(c echo.Context, relativePath string) string {
+	host := c.Request().Host
+	scheme := "http"
+	if c.Request().TLS != nil {
+		scheme = "https"
+	}
+	return fmt.Sprintf("%s://%s/%s", scheme, host, relativePath)
+}
 
-
+var globalArray []string
+/*
 func uploadHandlerMultiple(c echo.Context) error {
 	token := c.QueryParam("token")
 
 	decodedToken, _ := e.Decode(token, "key")
 	fmt.Println(decodedToken)
-
 	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB limit
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
-
 	form := c.Request().MultipartForm
-	files := form.File["my-files"] 
-
-	fmt.Println("FILEEEEEEEEEEEEEEEESSSS")
-	fmt.Println(files)
-
+	files := form.File["my-files"]
 	for _, file := range files {
 		fmt.Println("SRCCCCCCCCC" + file.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
 
@@ -182,75 +182,61 @@ func uploadHandlerMultiple(c echo.Context) error {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
+		fmt.Println("URLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
+		filePath := "static/" + file.Filename
+		fmt.Println(filePath)
+		fmt.Println("File URL:", getAbsoluteURL(c, filePath))
+
+		//fmt.Println(c.File(file.Filename))
+	//	return c.JSON(http.StatusOK,  getAbsoluteURL(c, filePath))
 	}
 
 	return c.String(http.StatusOK, "Files uploaded successfully!")
-}
+} */
 
-
-
-
-
-/*
-	   type FormData struct {
- 
-		Field1 string `json:"field1"`
-	
-	}
-	
-	   type CreateVacancyParams struct {
-		Title string `json:"title"`
-		Describtion string `json:"describtion"`
-		Skills []string `json:"skills"`
-		WorkingPerDay string `json:"workingPerDay"`
-		Location string `json:"location"`
-		Salary string `json:"salary"`
-	}
 func uploadHandlerMultiple(c echo.Context) error {
-	token := c.QueryParam("token")
+    token := c.QueryParam("token")
 
-	decodedToken, _ := e.Decode(token, "key")
-	fmt.Println(decodedToken)
+    decodedToken, _ := e.Decode(token, "key")
+    fmt.Println(decodedToken)
+    err := c.Request().ParseMultipartForm(10 << 20) // 10 MB limit
+    if err != nil {
+        return c.String(http.StatusInternalServerError, err.Error())
+    }
+    form := c.Request().MultipartForm
+    files := form.File["my-files"] 
+    var fileURLs []string  // Добавленный массив для хранения URL-ов файлов
+    for _, file := range files {
+        fmt.Println("SRCCCCCCCCC" + file.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
 
+        src, err := file.Open()
+        if err != nil {
+            return c.String(http.StatusInternalServerError, err.Error())
+        }
+        defer src.Close()
 
-	var createVacancyParams  CreateVacancyParams
-	err := json.NewDecoder(c.Request().Body).Decode(&createVacancyParams)
-	fmt.Println(err)
+        err = saveFile(src, file.Filename)
+        if err != nil {
+            return c.String(http.StatusInternalServerError, err.Error())
+        }
 
+        fmt.Println("URLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
+        filePath := "static/" + file.Filename
+        fmt.Println(filePath)
 
+        // Выводим URL картинки в консоль
+        fileURL := getAbsoluteURL(c, filePath)
+        fmt.Println("File URL:", fileURL)
+        
+        fileURLs = append(fileURLs, fileURL)  // Добавляем URL в массив
+    }
 
-
-
-
-	err = c.Request().ParseMultipartForm(10 << 20) // 10 MB limit
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-
-	form := c.Request().MultipartForm
-	files := form.File["my-files"] 
-
-	fmt.Println("FILEEEEEEEEEEEEEEEESSSS")
-	fmt.Println(files)
-
-	for _, file := range files {
-		fmt.Println("SRCCCCCCCCC" + file.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
-
-		src, err := file.Open()
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
-		defer src.Close()
-
-		err = saveFile(src, file.Filename)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
-	} 
-	return c.String(http.StatusOK, "Files uploaded successfully!")
+    // Возвращаем URL-ы файлов в ответе к клиенту
+    return c.JSON(http.StatusOK, map[string]interface{}{
+        "message": "Files uploaded successfully!",
+        "fileURLs": fileURLs,
+    })
 }
- */
-
 
 
 func SetPersonalInformation(e *echo.Echo) {
@@ -259,7 +245,8 @@ func SetPersonalInformation(e *echo.Echo) {
 	e.POST("/worklist.com/getPersonalInformation/setAvatar", controller.SetAvatar)
 	e.POST("/test", uploadHandler)
 	e.POST("/testMultiple", uploadHandlerMultiple)
-	e.POST("/worklist.com/createOffer", uploadHandlerMultiple)
+	e.POST("/worklist.com/createOffer", controller.CreateVacancy)
 	e.GET("/worklist.com/getPersonalInformation/getAvatar", img)
 }
+
 //http://localhost:5000/worklist.com/getPersonalInformation/getAvatar
