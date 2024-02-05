@@ -70,6 +70,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"fmt"
 	"io"
+	//"encoding/json"
 	m "server/db"
 	e "server/middleware"
 //	"io/ioutil"
@@ -151,14 +152,6 @@ func saveFile(src io.Reader, filename string) error {
 }
 
 
-
-
-
-
-
-
-
-
 func uploadHandlerMultiple(c echo.Context) error {
 	token := c.QueryParam("token")
 
@@ -189,23 +182,74 @@ func uploadHandlerMultiple(c echo.Context) error {
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
 		}
-
-	/*	if user, err := m.FindUserByUsername(decodedToken.Username); err == nil {
-			fmt.Println(user)
-			fmt.Println("New avaaaaaaaaaaaaaaaaaaaa")
-			fmt.Println(user.Avatar)
-			newAvatar := string(file.Filename)
-
-			errr := m.UpdateUserAvatar(user, newAvatar)
-			fmt.Println("ERROR ", errr)
-			fmt.Println("Everything is clear")
-			fmt.Println(user)
-		} */
 	}
 
 	return c.String(http.StatusOK, "Files uploaded successfully!")
 }
 
+
+
+
+
+/*
+	   type FormData struct {
+ 
+		Field1 string `json:"field1"`
+	
+	}
+	
+	   type CreateVacancyParams struct {
+		Title string `json:"title"`
+		Describtion string `json:"describtion"`
+		Skills []string `json:"skills"`
+		WorkingPerDay string `json:"workingPerDay"`
+		Location string `json:"location"`
+		Salary string `json:"salary"`
+	}
+func uploadHandlerMultiple(c echo.Context) error {
+	token := c.QueryParam("token")
+
+	decodedToken, _ := e.Decode(token, "key")
+	fmt.Println(decodedToken)
+
+
+	var createVacancyParams  CreateVacancyParams
+	err := json.NewDecoder(c.Request().Body).Decode(&createVacancyParams)
+	fmt.Println(err)
+
+
+
+
+
+
+	err = c.Request().ParseMultipartForm(10 << 20) // 10 MB limit
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+
+	form := c.Request().MultipartForm
+	files := form.File["my-files"] 
+
+	fmt.Println("FILEEEEEEEEEEEEEEEESSSS")
+	fmt.Println(files)
+
+	for _, file := range files {
+		fmt.Println("SRCCCCCCCCC" + file.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
+
+		src, err := file.Open()
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		defer src.Close()
+
+		err = saveFile(src, file.Filename)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+	} 
+	return c.String(http.StatusOK, "Files uploaded successfully!")
+}
+ */
 
 
 
@@ -215,6 +259,7 @@ func SetPersonalInformation(e *echo.Echo) {
 	e.POST("/worklist.com/getPersonalInformation/setAvatar", controller.SetAvatar)
 	e.POST("/test", uploadHandler)
 	e.POST("/testMultiple", uploadHandlerMultiple)
+	e.POST("/worklist.com/createOffer", uploadHandlerMultiple)
 	e.GET("/worklist.com/getPersonalInformation/getAvatar", img)
 }
 //http://localhost:5000/worklist.com/getPersonalInformation/getAvatar

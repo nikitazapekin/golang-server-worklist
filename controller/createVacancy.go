@@ -6,9 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"encoding/json"
 	e "server/middleware"
-)
-
- 
+) 
 type CreateVacancyParams struct {
 	Title string `json:"title"`
 	Describtion string `json:"describtion"`
@@ -24,7 +22,6 @@ func CreateVacancy(c echo.Context) error {
 fmt.Println("Decoded")
 fmt.Println(decodedToken)
 fmt.Println(errToken)
-
 var createVacancyParams  CreateVacancyParams
 	err := json.NewDecoder(c.Request().Body).Decode(&createVacancyParams)
 	fmt.Println(err)
