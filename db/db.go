@@ -4,13 +4,13 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+    "strings"
 	"math/rand"
 	"net/http"
     "github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"time"
 
-//	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
 
@@ -72,6 +72,29 @@ func CreateTable() {
 	}
 	fmt.Println("Table user_data created successfully.")
 }
+// VacancyData представляет структуру данных вакансии.
+
+/*
+type VacancyData struct {
+    ID            int      `json:"id"`
+    Title         string   `json:"title"`
+    Description   string   `json:"description"`
+    Skills        []string `json:"skills"`
+    WorkingPerDay string   `json:"workingPerDay"`
+    Location      string   `json:"location"`
+    Salary        string   `json:"salary"`
+} */
+
+type VacancyData struct {
+    ID            int      `json:"id"`
+    Title         string   `json:"title"`
+    Description   string   `json:"description"`
+    Skills        []string `json:"skills"`
+    WorkingPerDay string   `json:"workingPerDay"`
+    Location      string   `json:"location"`
+    Salary        string   `json:"salary"`
+}
+
 
 func CreateTableOfOffers() {
 	if DB == nil {
@@ -94,6 +117,62 @@ func CreateTableOfOffers() {
 	}
 	fmt.Println("Table user_data created successfully.")
 }
+
+
+
+func GetAllVacancyData() ([]VacancyData, error) {
+    initDatabase()
+    fmt.Println("INIT")
+    if DB == nil {
+        return nil, fmt.Errorf("Database connection is not established. Call Connect function first.")
+    }
+/*
+    query := `
+        SELECT title
+        FROM vacancy_data
+     `
+*/
+query := `
+    SELECT id, title, describtion, skills, workingPerDay, location, salary
+    FROM vacancy_data
+`
+
+    rows, err := DB.Query(query)
+    if err != nil {
+        return nil, fmt.Errorf("Failed to retrieve vacancy data: %v", err)
+    }
+    defer rows.Close()
+
+    fmt.Println("rows")
+    fmt.Println(rows)
+
+    vacancyData := make([]VacancyData, 0)
+   /* for rows.Next() {
+        var vd VacancyData
+        if err := rows.Scan(&vd.ID, &vd.Title, &vd.Description, &vd.Skills,  &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
+            return nil, fmt.Errorf("Failed to scan vacancy data: %v", err)
+        }
+        vacancyData = append(vacancyData, vd)
+    } */
+    for rows.Next() {
+        var vd VacancyData
+        var skills string
+        if err := rows.Scan(&vd.ID, &vd.Title, &vd.Description, &skills, &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
+            return nil, fmt.Errorf("Failed to scan vacancy data: %v", err)
+        }
+        vd.Skills = strings.Split(skills, ",")
+        vacancyData = append(vacancyData, vd)
+    }
+    
+ fmt.Println("FOUND ELEMS")
+ fmt.Println(vacancyData)
+    if err := rows.Err(); err != nil {
+        return nil, fmt.Errorf("Error in rows: %v", err)
+    }
+
+    return vacancyData, nil
+}
+
 
 //c.Response(), createVacancyParams.Title, createVacancyParams.Describtion, createVacancyParams.Skills[], createVacancyParams.WorkingPerDay, createVacancyParams.Location, createVacancyParams.Salary
 //func InsertDataIntoOffers(w http.ResponseWriter, title string, describtion string, skills  String[], workingPerDay string, location string, salary string) error {
@@ -307,7 +386,6 @@ return nil
           user.Email,
           newAvatar,
         ) 
-    
         if err != nil {
            return fmt.Errorf("Failed to update user_data: %v", err)
         }

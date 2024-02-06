@@ -157,6 +157,7 @@ func getAbsoluteURL(c echo.Context, relativePath string) string {
 }
 
 var globalArray []string
+
 /*
 func uploadHandlerMultiple(c echo.Context) error {
 	token := c.QueryParam("token")
@@ -195,50 +196,46 @@ func uploadHandlerMultiple(c echo.Context) error {
 } */
 
 func uploadHandlerMultiple(c echo.Context) error {
-    token := c.QueryParam("token")
+	token := c.QueryParam("token")
 
-    decodedToken, _ := e.Decode(token, "key")
-    fmt.Println(decodedToken)
-    err := c.Request().ParseMultipartForm(10 << 20) // 10 MB limit
-    if err != nil {
-        return c.String(http.StatusInternalServerError, err.Error())
-    }
-    form := c.Request().MultipartForm
-    files := form.File["my-files"] 
-    var fileURLs []string  // Добавленный массив для хранения URL-ов файлов
-    for _, file := range files {
-        fmt.Println("SRCCCCCCCCC" + file.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
+	decodedToken, _ := e.Decode(token, "key")
+	fmt.Println(decodedToken)
+	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB limit
+	if err != nil {
+		return c.String(http.StatusInternalServerError, err.Error())
+	}
+	form := c.Request().MultipartForm
+	files := form.File["my-files"]
+	var fileURLs []string // Добавленный массив для хранения URL-ов файлов
+	for _, file := range files {
+		fmt.Println("SRCCCCCCCCC" + file.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
 
-        src, err := file.Open()
-        if err != nil {
-            return c.String(http.StatusInternalServerError, err.Error())
-        }
-        defer src.Close()
+		src, err := file.Open()
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
+		defer src.Close()
 
-        err = saveFile(src, file.Filename)
-        if err != nil {
-            return c.String(http.StatusInternalServerError, err.Error())
-        }
+		err = saveFile(src, file.Filename)
+		if err != nil {
+			return c.String(http.StatusInternalServerError, err.Error())
+		}
 
-        fmt.Println("URLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
-        filePath := "static/" + file.Filename
-        fmt.Println(filePath)
+		fmt.Println("URLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
+		filePath := "static/" + file.Filename
+		fmt.Println(filePath)
 
-        // Выводим URL картинки в консоль
-        fileURL := getAbsoluteURL(c, filePath)
-        fmt.Println("File URL:", fileURL)
-        
-        fileURLs = append(fileURLs, fileURL)  // Добавляем URL в массив
-    }
+		fileURL := getAbsoluteURL(c, filePath)
+		fmt.Println("File URL:", fileURL)
+		globalArray = append(globalArray, fileURL)
+		fileURLs = append(fileURLs, fileURL)
+	}
 
-    // Возвращаем URL-ы файлов в ответе к клиенту
-    return c.JSON(http.StatusOK, map[string]interface{}{
-        "message": "Files uploaded successfully!",
-        "fileURLs": fileURLs,
-    })
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":  "Files uploaded successfully!",
+		"fileURLs": fileURLs,
+	})
 }
-
-
 func SetPersonalInformation(e *echo.Echo) {
 	e.POST("/worklist.com/getPersonalInformation/editPersonalData", controller.EditPersonalInformation)
 	e.GET("/worklist.com/getPersonalInformation", controller.GetPersonalInformation)
