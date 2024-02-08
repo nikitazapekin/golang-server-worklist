@@ -72,19 +72,6 @@ func CreateTable() {
 	}
 	fmt.Println("Table user_data created successfully.")
 }
-// VacancyData представляет структуру данных вакансии.
-
-/*
-type VacancyData struct {
-    ID            int      `json:"id"`
-    Title         string   `json:"title"`
-    Description   string   `json:"description"`
-    Skills        []string `json:"skills"`
-    WorkingPerDay string   `json:"workingPerDay"`
-    Location      string   `json:"location"`
-    Salary        string   `json:"salary"`
-} */
-
 type VacancyData struct {
     ID            int      `json:"id"`
     Title         string   `json:"title"`
@@ -126,12 +113,7 @@ func GetAllVacancyData() ([]VacancyData, error) {
     if DB == nil {
         return nil, fmt.Errorf("Database connection is not established. Call Connect function first.")
     }
-/*
-    query := `
-        SELECT title
-        FROM vacancy_data
-     `
-*/
+
 query := `
     SELECT id, title, describtion, skills, workingPerDay, location, salary
     FROM vacancy_data
@@ -147,13 +129,6 @@ query := `
     fmt.Println(rows)
 
     vacancyData := make([]VacancyData, 0)
-   /* for rows.Next() {
-        var vd VacancyData
-        if err := rows.Scan(&vd.ID, &vd.Title, &vd.Description, &vd.Skills,  &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
-            return nil, fmt.Errorf("Failed to scan vacancy data: %v", err)
-        }
-        vacancyData = append(vacancyData, vd)
-    } */
     for rows.Next() {
         var vd VacancyData
         var skills string
@@ -166,17 +141,26 @@ query := `
     
  fmt.Println("FOUND ELEMS")
  fmt.Println(vacancyData)
+ fmt.Println("FIRST")
+ fmt.Println(vacancyData[0].Skills[0])
     if err := rows.Err(); err != nil {
         return nil, fmt.Errorf("Error in rows: %v", err)
     }
+    for i := range vacancyData {
+        vacancyData[i].Description = strings.ReplaceAll(vacancyData[i].Description, `"`, "")
+        for j := range vacancyData[i].Skills {
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `"`, "")
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `{`, "")
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `}`, "")
+        }
+    }
 
     return vacancyData, nil
-}
+} 
 
-
-//c.Response(), createVacancyParams.Title, createVacancyParams.Describtion, createVacancyParams.Skills[], createVacancyParams.WorkingPerDay, createVacancyParams.Location, createVacancyParams.Salary
-//func InsertDataIntoOffers(w http.ResponseWriter, title string, describtion string, skills  String[], workingPerDay string, location string, salary string) error {
     func InsertDataIntoOffers(w http.ResponseWriter, title string, describtion string, skills []string, workingPerDay string, location string, salary string) error {
+        fmt.Println("CURRENT DATA") 
+        fmt.Println(title)
         fmt.Println("SKIIIIIIIIIIIIIIIIIIIIIILS")
         fmt.Println(skills)
     if DB == nil {
