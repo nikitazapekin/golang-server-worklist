@@ -1,66 +1,4 @@
-/*
-package router
-import (
-	"server/controller"
-	"github.com/labstack/echo/v4"
 
-
-
-
-	"fmt"
-	"net/http"
-	"io"
-	"os"
-	"path/filepath"
-
-
-
-)
-
-
-func uploadHandler(res http.ResponseWriter, req *http.Request) {
-	if req.Method == "POST" {
-		src, hdr, err := req.FormFile("my-file")
-		if err != nil {
-			http.Error(res, err.Error(), 500)
-			return
-		}
-		defer src.Close()
-
-		err = saveFile(src, hdr.Filename)
-		if err != nil {
-			http.Error(res, err.Error(), 500)
-			return
-		}
-
-		fmt.Fprintf(res, "File %s uploaded successfully!", hdr.Filename)
-		return
-	}
-}
-
-func saveFile(src io.Reader, filename string) error {
-	dst, err := os.Create(filepath.Join("static", filename))
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
-
-	_, err = io.Copy(dst, src)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func SetPersonalInformation(e *echo.Echo) {
-	e.POST("/worklist.com/getPersonalInformation/editPersonalData", controller.EditPersonalInformation)
-	e.GET("/worklist.com/getPersonalInformation", controller.GetPersonalInformation)
-	e.POST("/worklist.com/getPersonalInformation/setAvatar", controller.SetAvatar)
-	e.POST("/test", uploadHandler(e *echo.Echo))
-}
-
-*/
 
 package router
 
@@ -76,6 +14,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+
+  //  "strings"
 )
 
 func img(c echo.Context) error {
@@ -103,7 +43,6 @@ func uploadHandler(c echo.Context) error {
 	decodedToken, _ := e.Decode(token, "key")
 	fmt.Println(decodedToken)
 	src, err := c.FormFile("my-file")
-	fmt.Println("SRCCCCCCCCC" + src.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
 	if err != nil {
 		return c.String(http.StatusInternalServerError, err.Error())
 	}
@@ -134,17 +73,14 @@ func uploadHandler(c echo.Context) error {
 
 func saveFile(src io.Reader, filename string) error {
 	dst, err := os.Create(filepath.Join("static", filename))
-
 	if err != nil {
 		return err
 	}
 	defer dst.Close()
-
 	_, err = io.Copy(dst, src)
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 func getAbsoluteURL(c echo.Context, relativePath string) string {
@@ -157,44 +93,6 @@ func getAbsoluteURL(c echo.Context, relativePath string) string {
 }
 
 var globalArray []string
-
-/*
-func uploadHandlerMultiple(c echo.Context) error {
-	token := c.QueryParam("token")
-
-	decodedToken, _ := e.Decode(token, "key")
-	fmt.Println(decodedToken)
-	err := c.Request().ParseMultipartForm(10 << 20) // 10 MB limit
-	if err != nil {
-		return c.String(http.StatusInternalServerError, err.Error())
-	}
-	form := c.Request().MultipartForm
-	files := form.File["my-files"]
-	for _, file := range files {
-		fmt.Println("SRCCCCCCCCC" + file.Filename) // НАЗВАНИЕ КОТОРОЕ НАДО ЗАГНАТЬ В БД
-
-		src, err := file.Open()
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
-		defer src.Close()
-
-		err = saveFile(src, file.Filename)
-		if err != nil {
-			return c.String(http.StatusInternalServerError, err.Error())
-		}
-		fmt.Println("URLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL")
-		filePath := "static/" + file.Filename
-		fmt.Println(filePath)
-		fmt.Println("File URL:", getAbsoluteURL(c, filePath))
-
-		//fmt.Println(c.File(file.Filename))
-	//	return c.JSON(http.StatusOK,  getAbsoluteURL(c, filePath))
-	}
-
-	return c.String(http.StatusOK, "Files uploaded successfully!")
-} */
-
 func uploadHandlerMultiple(c echo.Context) error {
 	token := c.QueryParam("token")
 
@@ -236,6 +134,37 @@ func uploadHandlerMultiple(c echo.Context) error {
 		"fileURLs": fileURLs,
 	})
 }
+/*
+func imgg(c echo.Context) error {
+	title := c.QueryParam("title")
+	fmt.Println(title)
+	filePath := "static/" + title
+	response := map[string]string{
+		"avatar": filePath,
+	}
+	return c.JSON(http.StatusOK, response)
+ 
+	//return c.JSON(http.StatusBadRequest, "{message: error}")
+} */
+
+
+func GetUsername(c echo.Context) error { 
+	fmt.Println("GETTTTTTTTT USERNAMEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+	token := c.QueryParam("token")
+	decodedToken, err := e.Decode(token, "key")
+	user, err := m.FindUserByUsername(decodedToken.Username)
+	if(err !=nil ){
+
+		return c.JSON(http.StatusBadRequest, "{message: error}")
+	}
+	fmt.Println(decodedToken)
+	response := map[string]string{
+		"username": user.Username,
+	//	"avatar": filePath,
+//	}
+}
+	return c.JSON(http.StatusOK, response)
+}
 func SetPersonalInformation(e *echo.Echo) {
 	e.POST("/worklist.com/getPersonalInformation/editPersonalData", controller.EditPersonalInformation)
 	e.GET("/worklist.com/getPersonalInformation", controller.GetPersonalInformation)
@@ -244,6 +173,11 @@ func SetPersonalInformation(e *echo.Echo) {
 	e.POST("/testMultiple", uploadHandlerMultiple)
 	e.POST("/worklist.com/createOffer", controller.CreateVacancy)
 	e.GET("/worklist.com/getPersonalInformation/getAvatar", img)
+e.GET("/worklist.com/getUsername", GetUsername)
+	//e.GET("/worklist.com/image", imgg)
 }
+//http://localhost:5000/worklist.com/image/
+
+
 
 //http://localhost:5000/worklist.com/getPersonalInformation/getAvatar

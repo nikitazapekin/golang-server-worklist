@@ -13,5 +13,6 @@ func InitRoutes(e *echo.Echo) {
 	SetOffersRoutes(e)
 	SetPersonalInformation(e)
 	SetVacancy(e)
+	SetGetPhotos(e)
 }
 //    return offersApiInstance.get(`/getOffers`)

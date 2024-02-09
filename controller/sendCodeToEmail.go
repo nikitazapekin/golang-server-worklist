@@ -27,7 +27,6 @@ var code string = "ewww"
 func isValidPassword(password string) bool {
 	return len(password) >= 6 && strings.ContainsAny(password, "0123456789")
 }
-
 func isValidEmail(email string) bool {
 	regex := `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
 	return regexp.MustCompile(regex).MatchString(email)

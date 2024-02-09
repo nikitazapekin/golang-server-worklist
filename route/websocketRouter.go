@@ -1,13 +1,20 @@
 package router
 
 import (
-	"log"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"net/http"
 	"github.com/gorilla/websocket"
+	"github.com/labstack/echo/v4"
+	"log"
+	"net/http"
+
+
+	"encoding/json"
+    "time"
+	e "server/middleware"
+	m "server/db"
 )
-var numberOfOnlineUsers = 0 
+
+var numberOfOnlineUsers = 0
 var clients = make(map[*websocket.Conn]bool)
 var onlineUsersMessage = "%d"
 var (
@@ -15,12 +22,12 @@ var (
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
-			return true 
+			return true
 		},
 	}
 )
- 
- func handleWebSocket(c echo.Context) error {                //ХЭНДЛЕРРРРРРРРРРРРРРРР
+
+func handleWebSocket(c echo.Context) error { //ХЭНДЛЕРРРРРРРРРРРРРРРР
 	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
 	if err != nil {
 		return err
@@ -28,7 +35,7 @@ var (
 	clients[conn] = true
 	numberOfOnlineUsers++
 	broadcastOnlineUsersMessage()
-//	sendMessageToClient()
+	//	sendMessageToClient()
 	defer func() {
 		numberOfOnlineUsers--
 		delete(clients, conn)
@@ -52,7 +59,6 @@ var (
 		}
 	}
 }
- 
 func broadcastOnlineUsersMessage() {
 	message := fmt.Sprintf(onlineUsersMessage, numberOfOnlineUsers)
 	fmt.Println("MESSSSSSSSSAAAGE")
@@ -66,7 +72,47 @@ func broadcastOnlineUsersMessage() {
 	}
 }
 
+/*
+func handlePublicChat(c echo.Context) error {
+	conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+	if err != nil {
+		return err
+	}
+	clients[conn] = true
 
+	defer func() {
+		delete(clients, conn)
+		conn.Close()
+	}()
+	_, msgBytes, err := conn.ReadMessage()
+	if err != nil {
+		log.Printf("Error reading message from client: %v", err)
+		return err
+	}
+	handlePublicMessages(string(msgBytes))
+
+	return nil
+}
+
+func handlePublicMessages(message string) error {
+	fmt.Println("Received message CHATTTTTTTTTTTTTTTTTTTTTTTTTTTT:", message)
+	fmt.Println(clients)
+	for client := range clients {
+		err := client.WriteMessage(websocket.TextMessage, []byte(message))
+		if err != nil {
+			log.Printf("Error sending message to client: %v", err)
+		}
+	}
+	return nil
+} */
+
+
+
+type Message struct {
+    Username string `json:"username"`
+    Token    string `json:"token"`
+    Message  string `json:"message"`
+}
 
 func handlePublicChat(c echo.Context) error {
     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
@@ -80,21 +126,60 @@ func handlePublicChat(c echo.Context) error {
         conn.Close()
     }()
 
-    // Прочитать сообщение от клиента
     _, msgBytes, err := conn.ReadMessage()
     if err != nil {
         log.Printf("Error reading message from client: %v", err)
         return err
     }
 
-    // Передать сообщение в функцию handlePublicMessages
-    handlePublicMessages(string(msgBytes))
+    var incomingMessage Message
+    err = json.Unmarshal(msgBytes, &incomingMessage)
+    if err != nil {
+        log.Printf("Error unmarshaling message: %v", err)
+        return err
+    }
+
+ token := incomingMessage.Token
+ decodedToken, errToken := e.Decode(token, "key")
+ fmt.Println(errToken)  
+
+ fmt.Println("Decoded token")
+ fmt.Println(decodedToken)
+ user,err := m.FindUserByUsername(decodedToken.Username)
+ fmt.Println("USERrr")
+ fmt.Println(user)
+ fmt.Println("AVATARRRRRRRRRRRRRR")
+fmt.Println(user.Avatar)
+avatarFilename := user.Avatar
+avatarURL := fmt.Sprintf("http://localhost:5000/worklist.com/image/%s", avatarFilename)
+fmt.Println(avatarURL)
+    currentTime := time.Now().Format(time.RFC3339)
+    newMessage := struct {
+        Username string `json:"username"`
+        Message  string `json:"message"`
+        Data     string `json:"data"`
+		Avatar   string `json:"avatar"`
+    }{
+        Username: incomingMessage.Username,
+        Message:  incomingMessage.Message,
+        Data:     currentTime,
+		Avatar:  avatarFilename,
+		//Avatar:   avatarURL,
+    }
+
+    newMessageBytes, err := json.Marshal(newMessage)
+    if err != nil {
+        log.Printf("Error marshaling new message: %v", err)
+        return err
+    }
+
+    handlePublicMessages(string(newMessageBytes))
 
     return nil
 }
 
 func handlePublicMessages(message string) error {
-    fmt.Println("Received message CHATTTTTTTTTTTTTTTTTTTTTTTTTTTT:", message)
+    fmt.Println("Received message:", message)
     fmt.Println(clients)
     for client := range clients {
         err := client.WriteMessage(websocket.TextMessage, []byte(message))
@@ -106,7 +191,7 @@ func handlePublicMessages(message string) error {
 }
 
 func InitWebsocketRoutes(e *echo.Echo) {
-	e.GET("/ws", handleWebSocket)
-	e.GET("/publicMessages",handlePublicChat  )
- 
+	//e.GET("/ws", handleWebSocket)
+	e.GET("/publicMessages", handlePublicChat)
+
 }
