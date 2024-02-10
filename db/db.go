@@ -10,6 +10,7 @@ import (
     "github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"time"
+  // "strconv"
 
 	_ "github.com/lib/pq"
 )
@@ -106,7 +107,7 @@ func CreateTableOfOffers() {
 }
 
 
-
+/*
 func GetAllVacancyData() ([]VacancyData, error) {
     initDatabase()
     fmt.Println("INIT")
@@ -157,6 +158,126 @@ query := `
 
     return vacancyData, nil
 } 
+ */
+
+ func GetAmountOfOffers() ([]VacancyData, error) {
+    initDatabase()
+    fmt.Println("INIT")
+    if DB == nil {
+        return nil, fmt.Errorf("Database connection is not established. Call Connect function first.")
+    }
+
+query := `
+    SELECT id, title, describtion, skills, workingPerDay, location, salary
+    FROM vacancy_data
+`
+
+    rows, err := DB.Query(query)
+    if err != nil {
+        return nil, fmt.Errorf("Failed to retrieve vacancy data: %v", err)
+    }
+    defer rows.Close()
+
+    fmt.Println("rows")
+    fmt.Println(rows)
+amountOfOffers :=0;
+    vacancyData := make([]VacancyData, 0)
+    for rows.Next() {
+        var vd VacancyData
+        var skills string
+        if err := rows.Scan(&vd.ID, &vd.Title, &vd.Description, &skills, &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
+            return nil, fmt.Errorf("Failed to scan vacancy data: %v", err)
+        }
+        vd.Skills = strings.Split(skills, ",")
+        vacancyData = append(vacancyData, vd)
+    }
+    
+ fmt.Println("FOUND ELEMS")
+ fmt.Println(vacancyData)
+ fmt.Println("FIRST")
+ fmt.Println(vacancyData[0].Skills[0])
+    if err := rows.Err(); err != nil {
+        return nil, fmt.Errorf("Error in rows: %v", err)
+    }
+    for i := range vacancyData {
+      /*  vacancyData[i].Description = strings.ReplaceAll(vacancyData[i].Description, `"`, "")
+        for j := range vacancyData[i].Skills {
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `"`, "")
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `{`, "")
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `}`, "")
+        } */
+        fmt.Println(i)
+        amountOfOffers++;
+    }
+    return vacancyData, nil
+
+   // return strconv.Itoa(amountOfOffers), nil
+} 
+
+
+
+
+
+
+ func GetAllVacancyData(limit, page int) ([]VacancyData, error) {
+    initDatabase()
+    fmt.Println("INIT")
+    if DB == nil {
+        return nil, fmt.Errorf("Database connection is not established. Call Connect function first.")
+    }
+
+    // Вычисляем смещение на основе параметров limit и page для пагинации
+    offset := limit * (page - 1)
+
+   /* query := `
+        SELECT id, title, describtion, skills, workingPerDay, location, salary
+        FROM vacancy_data
+        LIMIT ? OFFSET ?
+    ` */
+    query := `
+    SELECT id, title, describtion, skills, workingPerDay, location, salary
+    FROM vacancy_data
+    LIMIT $1 OFFSET $2
+`
+
+    rows, err := DB.Query(query, limit, offset)
+    if err != nil {
+        return nil, fmt.Errorf("Failed to retrieve vacancy data: %v", err)
+    }
+    defer rows.Close()
+
+    fmt.Println("rows")
+    fmt.Println(rows)
+
+    vacancyData := make([]VacancyData, 0)
+    for rows.Next() {
+        var vd VacancyData
+        var skills string
+        if err := rows.Scan(&vd.ID, &vd.Title, &vd.Description, &skills, &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
+            return nil, fmt.Errorf("Failed to scan vacancy data: %v", err)
+        }
+        vd.Skills = strings.Split(skills, ",")
+        vacancyData = append(vacancyData, vd)
+    }
+
+    fmt.Println("FOUND ELEMS")
+    fmt.Println(vacancyData)
+    fmt.Println("FIRST")
+    fmt.Println(vacancyData[0].Skills[0])
+    if err := rows.Err(); err != nil {
+        return nil, fmt.Errorf("Error in rows: %v", err)
+    }
+    for i := range vacancyData {
+        vacancyData[i].Description = strings.ReplaceAll(vacancyData[i].Description, `"`, "")
+        for j := range vacancyData[i].Skills {
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `"`, "")
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `{`, "")
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `}`, "")
+        }
+    }
+
+    return vacancyData, nil
+}
 
     func InsertDataIntoOffers(w http.ResponseWriter, title string, describtion string, skills []string, workingPerDay string, location string, salary string) error {
         fmt.Println("CURRENT DATA") 
