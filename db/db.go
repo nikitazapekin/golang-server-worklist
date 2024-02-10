@@ -538,9 +538,6 @@ return nil
         return user, nil
     }
 
-
-
-     
     func FindOfferById(id string) (VacancyData, error) {
         fmt.Println("EMAILLLLLLLLLLLLLLLLLL")
         fmt.Println(id)
@@ -550,8 +547,6 @@ return nil
     
         query := "SELECT * FROM vacancy_data WHERE id = $1"
         row := DB.QueryRow(query, id)
-    
-     //   var user UserData
      var vacancy VacancyData
 
      var skills string
@@ -560,15 +555,13 @@ err := row.Scan(
     &vacancy.ID,
     &vacancy.Title,
     &vacancy.Description,
-    &skills, // Scan skills into a temporary string variable
+    &skills, 
     &vacancy.WorkingPerDay,
     &vacancy.Location,
     &vacancy.Salary,
     &vacancy.Owner,
     &images,
-  //  &vacancy.ImageSet,
     &vacancy.DataOfPublication,
- //   &vacancy.Comments,
     &vacancy.LastTimeOfRise,
 )
 
@@ -576,7 +569,6 @@ if err != nil {
     return VacancyData{}, fmt.Errorf("Failed to scan data: %v", err)
 }
 
-// Split the skills string into a slice of strings
 vacancy.Skills = strings.Split(skills, ",")
 vacancy.ImageSet = strings.Split(images, ",")
         if err == sql.ErrNoRows {
@@ -587,12 +579,6 @@ vacancy.ImageSet = strings.Split(images, ",")
     fmt.Println(vacancy)
         return vacancy, nil
     }
-
-
-
-
-
-
 
     func UpdateUser(user UserData, currentUserEmail string) error {
         fmt.Println("User id db")
