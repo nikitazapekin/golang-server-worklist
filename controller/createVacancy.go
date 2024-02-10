@@ -15,6 +15,8 @@ type CreateVacancyParams struct {
 	WorkingPerDay string `json:"workingPerDay"`
 	Location string `json:"location"`
 	Salary string `json:"salary"`
+	Token string `json:"token"`
+	ArrayOfPictures []string `json:"arrayOfPictures"`
 }
 //var arrayOfLastImgs String[]=[]
 
@@ -27,9 +29,11 @@ fmt.Println(decodedToken)
 fmt.Println(errToken)
 var createVacancyParams  CreateVacancyParams
 	err := json.NewDecoder(c.Request().Body).Decode(&createVacancyParams)
-	err=db.InsertDataIntoOffers(c.Response(), createVacancyParams.Title, createVacancyParams.Describtion, createVacancyParams.Skills, createVacancyParams.WorkingPerDay, createVacancyParams.Location, createVacancyParams.Salary )
+	fmt.Println("ARAYYYYYYYYYYYYYYYYYYYYYY ")
+	fmt.Println(createVacancyParams.ArrayOfPictures)
+	createVacancyParams.Token = token
+	err=db.InsertDataIntoOffers(c.Response(), createVacancyParams.Title, createVacancyParams.Describtion, createVacancyParams.Skills, createVacancyParams.WorkingPerDay, createVacancyParams.Location, createVacancyParams.Salary, createVacancyParams.Token, createVacancyParams.ArrayOfPictures )
 	fmt.Println(createVacancyParams.Title)
 	fmt.Println(err)
 return c.JSON(http.StatusOK, "{message: error}")
-//	return c.JSON(http.StatusOK, u)
 }
