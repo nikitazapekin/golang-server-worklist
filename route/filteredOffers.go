@@ -6,6 +6,6 @@ import (
 )
 
 func SetFilteredRoutes(e *echo.Echo) {
-	e.GET("/worklist.com/filterOffers", controller.GetBooks)
+	e.POST("/worklist.com/filterOffers", controller.GetFilteredOffers)
 }
 

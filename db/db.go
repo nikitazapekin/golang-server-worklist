@@ -195,6 +195,68 @@ data_of_publication VARCHAR(255),
 comments VARCHAR(255)[] ,
 last_time_of_rise VARCHAR(255)
  */
+ func GetAllOffers() ([]VacancyData, error) {
+    initDatabase()
+    fmt.Println("INIT")
+    if DB == nil {
+        return nil, fmt.Errorf("Database connection is not established. Call Connect function first.")
+    }
+query := `
+    SELECT id, title, describtion, skills, workingPerDay, location, salary
+    FROM vacancy_data
+`
+
+    rows, err := DB.Query(query)
+    if err != nil {
+        return nil, fmt.Errorf("Failed to retrieve vacancy data: %v", err)
+    }
+    defer rows.Close()
+
+    fmt.Println("rows")
+    fmt.Println(rows)
+
+    vacancyData := make([]VacancyData, 0)
+    for rows.Next() {
+        var vd VacancyData
+        var skills string
+        if err := rows.Scan(&vd.ID, &vd.Title, &vd.Description, &skills, &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
+            return nil, fmt.Errorf("Failed to scan vacancy data: %v", err)
+        }
+        vd.Skills = strings.Split(skills, ",")
+        vacancyData = append(vacancyData, vd)
+    }
+    
+ fmt.Println("FOUND ELEMS")
+ fmt.Println(vacancyData)
+ fmt.Println("FIRST")
+ fmt.Println(vacancyData[0].Skills[0])
+    if err := rows.Err(); err != nil {
+        return nil, fmt.Errorf("Error in rows: %v", err)
+    }
+    for i := range vacancyData {
+        vacancyData[i].Description = strings.ReplaceAll(vacancyData[i].Description, `"`, "")
+        for j := range vacancyData[i].Skills {
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `"`, "")
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `{`, "")
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `}`, "")
+        }
+    }
+
+    return vacancyData, nil
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
  func GetAllVacancyData(limit, page int) ([]VacancyData, error) {             
