@@ -115,8 +115,12 @@ func GetFilteredOffers(c echo.Context) error {
 	searchTitle := strings.ToLower(searchParams.Title)
 	searchLocation := strings.ToLower(searchParams.Location)
 	searchWorkingPerDay := strings.ToLower(searchParams.WorkingPerDay)
-	//searchFrom := strings.ToLower(searchParams.SalaryFrom)
-//	searchTo := strings.ToLower(searchParams.SalaryTo)
+searchSkills := searchParams.Skills
+searchSkillsLower := make([]string, len(searchSkills))
+for i, v := range searchSkills {
+searchSkillsLower[i] = strings.ToLower(v)
+}
+
 searchFrom, err := strconv.Atoi(searchParams.SalaryFrom)
 	searchTo, err := strconv.Atoi(searchParams.SalaryTo)
 	salaryBuffer :=0
@@ -134,8 +138,8 @@ searchTo=salaryBuffer
 		title := strings.ToLower(elem.Title)
 		location := strings.ToLower(elem.Location)
 		workingPerDay := strings.ToLower(elem.WorkingPerDay)
-		//from := elem.WorkingPerDay
 		salary :=elem.Salary
+		skills :=elem.Skills
 		if len(searchTitle) > 0 {
 		if containsTitle(title, searchTitle) {
 		//	filteredOffers = append(filteredOffers, elem)
@@ -175,9 +179,6 @@ fmt.Println(parts)
 }
 
 
-
-
-
 if searchTo > 0 {
 	parts := strings.Split(salary, "-")  // промежуток из бд
 	
@@ -203,6 +204,37 @@ if err != nil {
 
 
 
+
+ 
+if len(skills) > 0 {
+	skillsLower := make([]string, len(skills))
+	for i, v := range skills {
+	skillsLower[i] = strings.ToLower(v)
+	}
+	
+
+
+
+//	allPresent := true
+    for _, v := range searchSkillsLower {
+        found := false
+        for _, item := range skillsLower {
+            if item == v {
+                found = true
+                break
+            }
+        }
+        if !found {
+			isAbleToAddIntoFilterdItems=false
+           // allPresent = false
+            break
+        }
+    }
+
+
+
+
+}
 
 
 
