@@ -11,4 +11,5 @@ func InitRoutes(e *echo.Echo) {
 	SetVacancy(e)
 	SetGetPhotos(e)
 	SetFilteredRoutes((e))
+	SetGetUsers(e)
 }

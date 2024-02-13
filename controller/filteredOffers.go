@@ -89,7 +89,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings" 
-
+	"strconv"
 	"github.com/labstack/echo/v4"
 	m "server/db"
 )
@@ -114,6 +114,18 @@ func GetFilteredOffers(c echo.Context) error {
 	}
 	searchTitle := strings.ToLower(searchParams.Title)
 	searchLocation := strings.ToLower(searchParams.Location)
+	searchWorkingPerDay := strings.ToLower(searchParams.WorkingPerDay)
+	//searchFrom := strings.ToLower(searchParams.SalaryFrom)
+//	searchTo := strings.ToLower(searchParams.SalaryTo)
+searchFrom, err := strconv.Atoi(searchParams.SalaryFrom)
+	searchTo, err := strconv.Atoi(searchParams.SalaryTo)
+	salaryBuffer :=0
+
+		if searchTo < searchFrom {
+salaryBuffer = searchFrom
+searchFrom=searchTo
+searchTo=salaryBuffer
+	}
 	filteredOffers := make([]m.VacancyData, 0)        // ГЛОБАЛЬНОЕ ХРАНИЛИЩЕ ОТФИЛЬТРОВАННЫХ ПРЕДЛОЖЕНИЙ
 	//====================================================================================
 	//фильтрация
@@ -121,6 +133,9 @@ func GetFilteredOffers(c echo.Context) error {
 		isAbleToAddIntoFilterdItems := true
 		title := strings.ToLower(elem.Title)
 		location := strings.ToLower(elem.Location)
+		workingPerDay := strings.ToLower(elem.WorkingPerDay)
+		//from := elem.WorkingPerDay
+		salary :=elem.Salary
 		if len(searchTitle) > 0 {
 		if containsTitle(title, searchTitle) {
 		//	filteredOffers = append(filteredOffers, elem)
@@ -135,6 +150,63 @@ if len(searchLocation) > 0 {
 		isAbleToAddIntoFilterdItems=false
 	}
 }
+
+
+
+
+
+
+if len(searchWorkingPerDay) > 0 {
+convertedSearchWorkingPerDay, err :=  strconv.Atoi(searchWorkingPerDay)
+fmt.Println("PARTSSS")
+parts := strings.Split(workingPerDay, "-")
+fmt.Println(parts)
+	secParts := strings.Split(parts[1], " ")
+	fmt.Println(secParts)
+	convertedWorkingPerDay, err  := strconv.Atoi(secParts[0])
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "error"})
+	}
+	booleanValue:= isLessTimeThanRequired(convertedWorkingPerDay, convertedSearchWorkingPerDay)
+	if booleanValue == true {
+	} else {
+		isAbleToAddIntoFilterdItems=false
+	} 
+}
+
+
+
+
+
+if searchTo > 0 {
+	parts := strings.Split(salary, "-")  // промежуток из бд
+	
+first, err := strconv.Atoi(parts[0])
+second, err :=strconv.Atoi(parts[1])
+if err != nil {
+	fmt.Println("ERRRRRRRRRRRRR")
+	fmt.Println(err)
+	return c.JSON(http.StatusBadRequest, map[string]string{"error": "error"})
+}
+	//if containsTitle(location, searchLocation) {
+
+		fmt.Println("from ") 
+		fmt.Println(searchFrom, first)
+		fmt.Println("to")
+		fmt.Println(searchTo, second)
+		if first<=searchFrom && second>=searchTo  {
+
+	} else {
+		isAbleToAddIntoFilterdItems=false
+	}
+}
+
+
+
+
+
+
+
  if isAbleToAddIntoFilterdItems==true {
 	filteredOffers = append(filteredOffers, elem)
 } else {
@@ -145,9 +217,10 @@ if len(searchLocation) > 0 {
 	fmt.Println(filteredOffers)
 	return c.JSON(http.StatusOK, filteredOffers)
 }
-
+func isLessTimeThanRequired(title, searchTitle int) bool{
+return title>=searchTitle
+}
 func containsTitle(title, searchTitle string) bool {
-	//return title == searchTitle
 	return strings.Contains(title, searchTitle)
 }
 

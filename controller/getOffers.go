@@ -9,8 +9,7 @@ import (
 )
 
 func GetOffers(c echo.Context) error {
-//	limit := c.QueryParam("limit")
-	//page := c.QueryParam("page")
+
 	limitStr := c.QueryParam("limit")
     pageStr := c.QueryParam("page")
 	

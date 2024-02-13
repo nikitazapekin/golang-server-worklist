@@ -186,15 +186,6 @@ amountOfOffers :=0;
 
    // return strconv.Itoa(amountOfOffers), nil
 } 
-
-
-
-/*
-image_set VARCHAR(255)[] ,
-data_of_publication VARCHAR(255),
-comments VARCHAR(255)[] ,
-last_time_of_rise VARCHAR(255)
- */
  func GetAllOffers() ([]VacancyData, error) {
     initDatabase()
     fmt.Println("INIT")
@@ -246,7 +237,77 @@ query := `
 } 
 
 
+//=========================================================================
 
+ func GetAllUsers() ([]UserData, error) {
+    initDatabase()
+    fmt.Println("INIT")
+    if DB == nil {
+        return nil, fmt.Errorf("Database connection is not established. Call Connect function first.")
+    }
+query := `
+    SELECT username, country, city, telephone, email, password, role, registration_data, avatar, document, favourite_offers,  experience, education, last_time_at_network, chats, user_id, describtion
+    FROM user_data
+`
+    rows, err := DB.Query(query)
+    if err != nil {
+        return nil, fmt.Errorf("Failed to retrieve vacancy data: %v", err)
+    }
+    defer rows.Close()
+
+    fmt.Println("rows")
+    fmt.Println(rows)
+
+    vacancyData := make([]UserData, 0)
+   /* for rows.Next() {
+        var vd UserData
+        var skills string
+       if err := rows.Scan(&vd.Username, &vd.Country, &vd.Telephone, &sk, &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
+       // if err := rows.Scan(&vd.ID, &vd.Title, &vd.Description, &skills, &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
+            return nil, fmt.Errorf("Failed to scan vacancy data: %v", err)
+        }
+        vd.Skills = strings.Split(skills, ",")
+        vacancyData = append(vacancyData, vd)
+    }
+    
+ fmt.Println("FOUND ELEMS")
+ fmt.Println(vacancyData)
+ fmt.Println("FIRST")
+ fmt.Println(vacancyData[0].Skills[0])
+    if err := rows.Err(); err != nil {
+        return nil, fmt.Errorf("Error in rows: %v", err)
+    }
+    for i := range vacancyData {
+        vacancyData[i].Description = strings.ReplaceAll(vacancyData[i].Description, `"`, "")
+        for j := range vacancyData[i].Skills {
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `"`, "")
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `{`, "")
+            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `}`, "")
+        }
+    }
+ */
+    return vacancyData, nil
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//==============================================
 
 
 
