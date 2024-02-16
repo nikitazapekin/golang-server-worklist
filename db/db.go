@@ -8,13 +8,13 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
+	"regexp"
 	"strconv"
 	//	_ "github.com/lib/pq"
 	"time"
 	// "strconv"
 	//	_ "github.com/lib/pq"
 )
-
 var (
 	DB *sql.DB
 )
@@ -48,7 +48,6 @@ func CreateTable() {
 	if DB == nil {
 		log.Fatal("Database connection is not established. Call Connect function first.")
 	}
-
 	query := `
 	CREATE TABLE IF NOT EXISTS user_data (
 		username VARCHAR(255),
@@ -112,29 +111,7 @@ type VacancyData struct {
 	//  Comments     []string `json:"comments"`
 	LastTimeOfRise string `json:"last_time_of_rise"`
 }
-
-/* ПОСЛЕДНЯЯ ВЕРСИЯ ПОЛЯ vacancy_data
-func CreateTableOfOffers() {
-	if DB == nil {
-		log.Fatal("Database connection is not established. Call Connect function first.")
-	}
-	query := `
-	CREATE TABLE IF NOT EXISTS vacancy_data (
-        id SERIAL PRIMARY KEY,
-        title VARCHAR(255),
-        describtion VARCHAR(255),
-        skills VARCHAR(255)[] ,
-        workingPerDay VARCHAR(255),
-        location VARCHAR(255),
-           salary VARCHAR(255)
-	);
-	`
-	_, err := DB.Exec(query)
-	if err != nil {
-		log.Fatalf("Failed to create table: %v", err)
-	}
-	fmt.Println("Table user_data created successfully.")
-}  */
+ 
 
 func CreateTableOfOffers() {
 	if DB == nil {
@@ -155,7 +132,7 @@ func CreateTableOfOffers() {
            last_time_of_rise VARCHAR(255)
            );
            `
-	//  comments VARCHAR(255)[] ,
+ 
 	_, err := DB.Exec(query)
 	if err != nil {
 		log.Fatalf("Failed to create table: %v", err)
@@ -284,53 +261,15 @@ func GetAllUsers() ([]UserData, error) {
 	fmt.Println(rows)
 
 	vacancyData := make([]UserData, 0)
-	/* for rows.Next() {
-	       var vd UserData
-	       var skills string
-	      if err := rows.Scan(&vd.Username, &vd.Country, &vd.Telephone, &sk, &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
-	      // if err := rows.Scan(&vd.ID, &vd.Title, &vd.Description, &skills, &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
-	           return nil, fmt.Errorf("Failed to scan vacancy data: %v", err)
-	       }
-	       vd.Skills = strings.Split(skills, ",")
-	       vacancyData = append(vacancyData, vd)
-	   }
-
-	fmt.Println("FOUND ELEMS")
-	fmt.Println(vacancyData)
-	fmt.Println("FIRST")
-	fmt.Println(vacancyData[0].Skills[0])
-	   if err := rows.Err(); err != nil {
-	       return nil, fmt.Errorf("Error in rows: %v", err)
-	   }
-	   for i := range vacancyData {
-	       vacancyData[i].Description = strings.ReplaceAll(vacancyData[i].Description, `"`, "")
-	       for j := range vacancyData[i].Skills {
-	           vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `"`, "")
-	           vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `{`, "")
-	           vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `}`, "")
-	       }
-	   }
-	*/
+	 
 	return vacancyData, nil
 }
 
 //==============================================
 // http://localhost:5000/worklist.com/getOffers?limit=6&page=1
-/*
- {
-     "title": "lat",
-     "skills": ["teststt"],
-     "workingPerDay": "",
-     "location": "",
-     "from": "1444",
-     "to": "1222"
-}
-*/
-func GetFilteredPaginationData(limit, page int, title string, skills []string, workingPerDay string, location string, from, to string) ([]VacancyData, error) {
-	//return "mvdvf"
-	fmt.Println("TITLEEEEEEEEEEEEEEEEEEEE" + title)
-	//vacancyData := make([]VacancyData, 0)
 
+func GetFilteredPaginationData(limit, page int, title string, skills []string, workingPerDay string, location string, from, to string) ([]VacancyData, error) {
+	fmt.Println("TITLEEEEEEEEEEEEEEEEEEEE" + title)
 	initDatabase()
 	fmt.Println("INIT")
 	if DB == nil {
@@ -453,122 +392,7 @@ LIMIT $1 OFFSET $2
 	return vacancyData, nil
 }
 
-/* ДО ПОИСКОВ
- func GetAllVacancyData(limit, page int) ([]VacancyData, error) {
-    initDatabase()
-    fmt.Println("INIT")
-    if DB == nil {
-        return nil, fmt.Errorf("Database connection is not established. Call Connect function first.")
-    }
-    offset := limit * (page - 1)
-
-    query := `
-    SELECT id, title, describtion, skills, workingPerDay, location, salary, image_set, data_of_publication, owner
-    FROM vacancy_data
-    LIMIT $1 OFFSET $2
-`
-
-    rows, err := DB.Query(query, limit, offset)
-    if err != nil {
-        return nil, fmt.Errorf("Failed to retrieve vacancy data: %v", err)
-    }
-    defer rows.Close()
-
-    fmt.Println("rows")
-    fmt.Println(rows)
-    vacancyData := make([]VacancyData, 0)
-    for rows.Next() {
-        var vd VacancyData
-        var skills string
-        var images string
-        if err := rows.Scan(&vd.ID, &vd.Title, &vd.Description, &skills, &vd.WorkingPerDay, &vd.Location, &vd.Salary, &images, &vd.DataOfPublication, &vd.Owner); err != nil {
-            return nil, fmt.Errorf("Failed to scan vacancy data: %v", err)
-        }
-        vd.Skills = strings.Split(skills, ",")
-        fmt.Println("IMAGEEEEEEEEEEEEEESS")
-        vacancyData = append(vacancyData, vd)
-
-    }
-
-
-    fmt.Println("FOUND ELEMS")
-    fmt.Println(vacancyData)
-    fmt.Println("FIRST")
-    fmt.Println(vacancyData[0].Skills[0])
-    if err := rows.Err(); err != nil {
-        return nil, fmt.Errorf("Error in rows: %v", err)
-    }
-    for i := range vacancyData {
-        vacancyData[i].Description = strings.ReplaceAll(vacancyData[i].Description, `"`, "")
-        for j := range vacancyData[i].Skills {
-            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `"`, "")
-            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `{`, "")
-            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `}`, "")
-        }
-    }
-
-    return vacancyData, nil
-} */
-/*
- func GetAllVacancyData(limit, page int) ([]VacancyData, error) {                 CТАРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРРОООООООООООООООООООООООЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕЕ
-    initDatabase()
-    fmt.Println("INIT")
-    if DB == nil {
-        return nil, fmt.Errorf("Database connection is not established. Call Connect function first.")
-    }
-    offset := limit * (page - 1)
-
-    query := `
-    SELECT id, title, describtion, skills, workingPerDay, location, salary
-    FROM vacancy_data
-    LIMIT $1 OFFSET $2
-`
-
-    rows, err := DB.Query(query, limit, offset)
-    if err != nil {
-        return nil, fmt.Errorf("Failed to retrieve vacancy data: %v", err)
-    }
-    defer rows.Close()
-
-    fmt.Println("rows")
-    fmt.Println(rows)
-
-    vacancyData := make([]VacancyData, 0)
-    for rows.Next() {
-        var vd VacancyData
-        var skills string
-        if err := rows.Scan(&vd.ID, &vd.Title, &vd.Description, &skills, &vd.WorkingPerDay, &vd.Location, &vd.Salary); err != nil {
-            return nil, fmt.Errorf("Failed to scan vacancy data: %v", err)
-        }
-        vd.Skills = strings.Split(skills, ",")
-        vacancyData = append(vacancyData, vd)
-    }
-
-    fmt.Println("FOUND ELEMS")
-    fmt.Println(vacancyData)
-    fmt.Println("FIRST")
-    fmt.Println(vacancyData[0].Skills[0])
-    if err := rows.Err(); err != nil {
-        return nil, fmt.Errorf("Error in rows: %v", err)
-    }
-    for i := range vacancyData {
-        vacancyData[i].Description = strings.ReplaceAll(vacancyData[i].Description, `"`, "")
-        for j := range vacancyData[i].Skills {
-            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `"`, "")
-            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `{`, "")
-            vacancyData[i].Skills[j] = strings.ReplaceAll(vacancyData[i].Skills[j], `}`, "")
-        }
-    }
-
-    return vacancyData, nil
-} */
-/*
-  owner VARCHAR(255),
-           image_set VARCHAR(255)[] ,
-           data_of_publication VARCHAR(255),
-          comments VARCHAR(255)[] ,
-          last_time_of_rise VARCHAR(255)
-*/
+ 
 func InsertDataIntoOffers(w http.ResponseWriter, title string, describtion string, skills []string, workingPerDay string, location string, salary string, token string, arrayOfPictures []string) (int, error) {
 	now := time.Now()
 	dateString := now.Format("02,01,2006")
@@ -622,6 +446,56 @@ func GetLastInsertedID() (int, error) {
     fmt.Println("Last inserted ID:", lastID)
     return lastID, nil
 }
+
+func GetVacancyData(id string) (VacancyData, error) {
+    if DB == nil {
+        return VacancyData{}, fmt.Errorf("Database connection is not established. Call Connect function first.")
+    }
+    
+    var vacancyData VacancyData
+    /*query := `
+        SELECT id, title, describtion, skills, workingPerDay, location, salary, image_set, data_of_publication, owner
+        FROM vacancy_data
+        WHERE id=$1
+    `
+    row := DB.QueryRow(query, id)
+    
+    var skillsData, imageSetData []byte
+    err := row.Scan(&vacancyData.ID, &vacancyData.Title, &vacancyData.Description, &skillsData, &vacancyData.WorkingPerDay, &vacancyData.Location, &vacancyData.Salary, &imageSetData, &vacancyData.DataOfPublication, &vacancyData.Owner)
+    if err != nil {
+        return VacancyData{}, fmt.Errorf("Failed to retrieve vacancy data: %v", err)
+    }
+    
+    // Преобразование байтов данных в строку и разделение по запятым для навыков
+    vacancyData.Skills = strings.Split(string(skillsData), ",")
+    
+    // Преобразование байтов данных в строку и разделение по запятым для image_set
+    vacancyData.ImageSet = strings.Split(string(imageSetData), ",")
+    
+    fmt.Println("Vacancy Data ID:", vacancyData.ID) */
+
+	query := `
+	SELECT id, title
+	FROM vacancy_data
+	WHERE id=$1
+`
+row := DB.QueryRow(query, 4)
+
+err := row.Scan(&vacancyData.ID, &vacancyData.Title)
+if err != nil {
+	return VacancyData{}, fmt.Errorf("Failed to retrieve vacancy data: %v", err)
+}
+
+
+    fmt.Println(vacancyData)
+    return vacancyData, nil
+}
+
+
+
+
+
+
 
 func InsertData(w http.ResponseWriter, username string, password string, country, city string, telephone string, email string) error {
 	if DB == nil {
@@ -841,35 +715,9 @@ func UpdateUser(user UserData, currentUserEmail string) error {
 	return nil
 }
 
-/*
-func UpdateUserIds(user UserData, currentUsername string, id int) error {
-	fmt.Println("User id db")
-	fmt.Println("current email" + currentUsername)
-	fmt.Println("Tel " + user.Telephone)
-	fmt.Println("doc" + user.Document)
-	if DB == nil {
-		return fmt.Errorf("Database connection is not established. Call Connect function first.")
-	}
-	query := `
-            UPDATE user_data
-            SET country=$2, city=$3, telephone=$4, password=$5,
-                education=$6, describtion=$7, experience=$8,  document=$9, email=$10
-            WHERE username = $1
-        `
-	_, err := DB.Exec(query,
-		currentUsername, id,
-	 
-	)
-
-	if err != nil {
-		return fmt.Errorf("Failed to update user_data: %v", err)
-	}
-
-	fmt.Println("User updated successfully.")
-	return nil
-} */
 
 
+ 
 func UpdateUserIds(user UserData, currentUsername string, id int) error {
     fmt.Println("User id db")
     fmt.Println("current email" + currentUsername)
@@ -878,55 +726,66 @@ func UpdateUserIds(user UserData, currentUsername string, id int) error {
     if DB == nil {
         return fmt.Errorf("Database connection is not established. Call Connect function first.")
     }
- 
-    var currentOffers []string
 
-	fmt.Println("BEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
-	fmt.Println(currentUsername)
+    var currentOffers []byte
+
+    fmt.Println("BEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+    fmt.Println(currentUsername)
     query := `SELECT your_offers FROM user_data WHERE username = $1`
     row := DB.QueryRow(query, currentUsername)
     err := row.Scan(&currentOffers)
     if err != nil {
-		fmt.Printf("ERRRRRRRRRRRRRRRRRRRRRRRR")
-		fmt.Println(err)
+        fmt.Printf("ERRRRRRRRRRRRRRRRRRRRRRRR")
+        fmt.Println(err)
         return fmt.Errorf("Failed to get current your_offers: %v", err)
     }
-fmt.Println("CEURR OFFERS BEFOREEEEEEEEEE")
-fmt.Println(currentOffers)
- 
-    currentOffers = append(currentOffers, strconv.Itoa(id))
 
-	fmt.Println("CEURR OFFERS AFTERRR")
-	fmt.Println(currentOffers)
- /*   updateQuery := `
+    fmt.Println("CEURR OFFERS BEFOREEEEEEEEEE")
+    fmt.Println(string(currentOffers))
+
+    // Convert []byte to []string
+    currentOffersSlice := strings.Split(string(currentOffers), ",")  
+
+    fmt.Println("CEURR OFFERS AFTERRR")
+    fmt.Println(currentOffersSlice)
+   currentOffersSlice = strings.Split(string(currentOffers), ",")
+fmt.Println("CEURR OFFERS AFTERRR")
+fmt.Println(currentOffersSlice)
+
+var numbers []string
+
+for _, offer := range currentOffersSlice {
+    re := regexp.MustCompile(`(\d+)`)
+    matches := re.FindStringSubmatch(offer)
+    if len(matches) > 1 {
+        numbers = append(numbers, matches[1])
+    }
+}
+numbers = append(numbers, strconv.Itoa(id))
+
+fmt.Println(numbers)
+
+
+
+    updateQuery := `
         UPDATE user_data
-        SET country=$2, city=$3, telephone=$4, password=$5,
-            education=$6, describtion=$7, experience=$8,  document=$9, email=$10,
-            your_offers=$11
+        SET your_offers = $2
         WHERE username = $1
-    ` */
-	updateQuery := `
-	UPDATE user_data
-	SET your_offers=$2
-	WHERE username = $1
-`
+    `
     _, err = DB.Exec(updateQuery,
-        currentUsername,// user.Country, user.City, user.Telephone, user.Password,
-       // user.Education, user.Describtion, user.Experience, user.Document, user.Email,
-        currentOffers,
+        currentUsername,
+    //    pq.Array(currentOffersSlice),
+	pq.Array(numbers),
     )
     if err != nil {
+        fmt.Println("EROOOOOOOOOOOOOOOR")
+        fmt.Println(err)
         return fmt.Errorf("Failed to update user_data: %v", err)
     }
 
     fmt.Println("User updated successfully.")
     return nil
 }
-
-
-
-
-
 
 func UpdateUserAvatar(user UserData, newAvatar string) error {
 	fmt.Println("User id db")
