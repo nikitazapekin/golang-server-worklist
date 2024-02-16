@@ -79,20 +79,17 @@ func GetFilteredOffers(c echo.Context) error {
 func containsTitle(title, searchTitle string) bool {
 	return title == searchTitle
 }  */
-
-
-
 package controller
-
 import (
-	"encoding/json"
-	"fmt"
+	//"encoding/json"
+	//"fmt"
 	"net/http"
 	"strings" 
-	"strconv"
+	//"strconv"
 	"github.com/labstack/echo/v4"
-	m "server/db"
+	//m "server/db"
 )
+/*
 type SearchVacancyParams struct {
 	Title         string   `json:"title"`
 	Skills        []string `json:"skills"`
@@ -100,9 +97,11 @@ type SearchVacancyParams struct {
 	Location      string   `json:"location"`
 	SalaryFrom    string   `json:"from"`
 	SalaryTo      string   `json:"to"`
-}
+} */
 func GetFilteredOffers(c echo.Context) error {
-	var searchParams SearchVacancyParams
+	//var searchParams SearchVacancyParams
+
+	/*
 	err := json.NewDecoder(c.Request().Body).Decode(&searchParams)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "error"})
@@ -244,10 +243,11 @@ if len(skills) > 0 {
 } else {
 	//filteredOffers=elems
 }
-	}
+	} 
 //========================================================================================
 	fmt.Println(filteredOffers)
-	return c.JSON(http.StatusOK, filteredOffers)
+	return c.JSON(http.StatusOK, filteredOffers) */
+	return c.JSON(http.StatusOK, "test")
 }
 func isLessTimeThanRequired(title, searchTitle int) bool{
 return title>=searchTitle
@@ -270,4 +270,13 @@ func containsTitle(title, searchTitle string) bool {
 /*
 	var editDataParams EditDataParams
 	err := json.NewDecoder(c.Request().Body).Decode(&editDataParams)
+	*/
+
+	/*
+	    title: PagProps.title,
+    skills: PagProps.skills,
+    workingPerDay: PagProps.workingPerDay,
+    location: PagProps.location,
+    from:  PagProps.salary.from,
+    to: PagProps.salary.to
 	*/

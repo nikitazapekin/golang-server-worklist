@@ -32,8 +32,12 @@ var createVacancyParams  CreateVacancyParams
 	fmt.Println("ARAYYYYYYYYYYYYYYYYYYYYYY ")
 	fmt.Println(createVacancyParams.ArrayOfPictures)
 	createVacancyParams.Token = token
-	err=db.InsertDataIntoOffers(c.Response(), createVacancyParams.Title, createVacancyParams.Describtion, createVacancyParams.Skills, createVacancyParams.WorkingPerDay, createVacancyParams.Location, createVacancyParams.Salary, createVacancyParams.Token, createVacancyParams.ArrayOfPictures )
+	id, err:=db.InsertDataIntoOffers(c.Response(), createVacancyParams.Title, createVacancyParams.Describtion, createVacancyParams.Skills, createVacancyParams.WorkingPerDay, createVacancyParams.Location, createVacancyParams.Salary, createVacancyParams.Token, createVacancyParams.ArrayOfPictures )
 	fmt.Println(createVacancyParams.Title)
 	fmt.Println(err)
+	fmt.Println("CURRRRRRRRRRRRRRRRRRRRRRRRRRRRRREEEEEEEEEEEEEEEEENT IDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
+	fmt.Println(id)
+	user, err := db.FindUserByUsername(decodedToken.Username)
+	db.UpdateUserIds(user, decodedToken.Username, id)
 return c.JSON(http.StatusOK, "{message: error}")
 }

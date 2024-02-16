@@ -24,7 +24,7 @@ import (
 	RegistrationData     string `json:"registration_data"`
 	Avatar               string `json:"avatar"`
 	Document             string `json:"document"`
-	FavouriteOffers      string `json:"favourite_offers"`
+	YourOffers      string `json:"your_offers"`
 	Experience           string `json:"experience"`
 	Education            string `json:"education"`
 	LastTimeAtNetwork    string `json:"last_time_at_network"`
@@ -59,7 +59,7 @@ user, userErr := m.FindUserByUsername(decodedToken.Username)
 		"RegistrationData": user.RegistrationData,
 		"avatar": user.Avatar,
 		"document": user.Document,
-		"favouriteOffers":  user.FavouriteOffers,
+		"your_offers":  user.YourOffers,
 		"experience": user.Experience,
 		"lastTimeAtNetwork": user.LastTimeAtNetwork,
 		"education": user.Education,
